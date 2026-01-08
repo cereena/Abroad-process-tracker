@@ -1,0 +1,108 @@
+import React, { useState } from "react";
+import axios from "axios";
+import { Link, useNavigate } from "react-router-dom";
+
+const Login = () => {
+
+  const [role, setRole] = useState("student");
+
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
+    try {
+      const url =
+        role === "student"
+          ? "http://localhost:5000/api/student/login"
+          : role === "admin"
+            ? "http://localhost:5000/api/admin/login"
+            : "http://localhost:5000/api/doc/login";
+
+      const { data } = await axios.post(url, { email, password });
+
+      // Save user based on role
+      if (role === "student") {
+        localStorage.setItem("studentId", data.student.id);
+        navigate("/dashboard");
+      }
+
+      if (role === "admin") {
+  console.log("Admin login success", data);
+  localStorage.setItem("adminId", data.admin.id);
+  navigate("/admin/dashboard");
+}
+
+
+      if (role === "doc") {
+        localStorage.setItem("docId", data.doc.id);
+        navigate("/doc/dashboard");
+      }
+
+      alert("Login successful");
+    } catch (error) {
+      alert(error.response?.data?.message || "Login failed");
+    }
+  };
+
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-orange-100 px-4">
+      <div className="bg-white w-full max-w-md p-8 rounded-xl shadow-xl">
+        <h2 className="text-3xl font-bold text-center text-blue-900 mb-6">
+          Student Login
+        </h2>
+
+        <form onSubmit={handleLogin} className="space-y-5">
+
+          <select
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            className="w-full p-2 border rounded"
+          >
+            <option value="student">Student</option>
+            <option value="admin">Admin</option>
+            <option value="doc">Documentation Executive</option>
+          </select>
+
+          <input
+            type="email"
+            placeholder="Email"
+            required
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full p-2 border rounded"
+          />
+
+          <input
+            type="password"
+            placeholder="Password"
+            required
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full p-2 border rounded"
+          />
+
+          <button className="w-full py-3 bg-blue-700 text-white font-semibold rounded-lg">
+            Login
+          </button>
+        </form>
+
+        <div className="mt-4 text-center text-sm">
+          <Link to="/forgot-password" className="text-blue-700 font-semibold">
+            Forgot Password?
+          </Link>
+        </div>
+
+        <p className="mt-4 text-center text-sm">
+          New student?{" "}
+          <Link to="/register" className="text-orange-600 font-semibold">
+            Register
+          </Link>
+        </p>
+      </div>
+    </div>
+  );
+};
+
+export default Login;
