@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 function AdminDashboard() {
+
   const [stats, setStats] = useState({
     totalStudents: 128,
     pendingDocs: 23,
@@ -10,6 +11,14 @@ function AdminDashboard() {
     inactiveStudents: 18
   });
 
+  const [notifications, setNotifications] = useState([]);
+
+  useEffect(() => {
+    fetch("http://localhost:5000/api/notifications/admin")
+      .then(res => res.json())
+      .then(data => setNotifications(data))
+      .catch(err => console.error("Failed to load notifications", err));
+  }, []);
 
   const recentActivities = [
     "Rahul uploaded passport document",
@@ -24,6 +33,7 @@ function AdminDashboard() {
     "Review visa applications",
     "Generate monthly report"
   ];
+
 
   return (
     <div style={styles.page}>

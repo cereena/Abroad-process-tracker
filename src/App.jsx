@@ -38,12 +38,34 @@ import Students from "./pages/admin/Students.jsx";
 import Applications from "./pages/admin/Applications.jsx";
 import Universities_admin from "./pages/admin/Universities-admin.jsx";
 import Reports from "./pages/admin/Reports.jsx";
+
+
 import DocsTeam from "./pages/admin/DocsTeam.jsx";
+import DocLayout from "./layouts/DocLayout.jsx";
+import DocStudents from "./pages/documetation/DocStudents.jsx";
+import DocApplications from "./pages/documetation/DocApplications.jsx";
+import CourseFinder from "./pages/documetation/CourseFinder.jsx";
+import DocsCommission from "./pages/documetation/DocsCommission.jsx";
+import DocRegister from "./pages/documetation/DocRegister.jsx";
+import AdminNotifications from "./pages/admin/AdminNotifications.jsx";
+
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+
+        {/* ================= PUBLIC WEBSITE ================= */}
+        <Route element={<MainLayout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/courses" element={<Courses />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/doc/register" element={<DocRegister />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+        </Route>
 
         {/* ================= ADMIN ================= */}
         <Route element={<RoleRoute role="admin" />}>
@@ -55,22 +77,20 @@ function App() {
             <Route path="universities" element={<Universities_admin />} />
             <Route path="docs-team" element={<DocsTeam />} />
             <Route path="reports" element={<Reports />} />
+            <Route path="/admin/notifications" element={<AdminNotifications/>} />
           </Route>
         </Route>
 
+        {/* ================= Documentation ================= */}
         <Route element={<RoleRoute role="doc" />}>
-          <Route path="/doc/dashboard" element={<DocDashboard />} />
-        </Route>
-
-        {/* ================= PUBLIC WEBSITE ================= */}
-        <Route element={<MainLayout />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/courses" element={<Courses />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/doc" element={<DocLayout />}>
+            <Route index element={<DocDashboard />} />
+            <Route path="dashboard" element={<DocDashboard />} />
+            <Route path="students" element={<DocStudents />} />
+            <Route path="applications" element={<DocApplications />} />
+            <Route path="commission" element={<DocsCommission />} />
+            <Route path="course-finder" element={<CourseFinder />} />
+          </Route>
         </Route>
 
         {/* ================= STUDENT DASHBOARD ================= */}
@@ -86,6 +106,7 @@ function App() {
             <Route path="/notifications" element={<Notifications />} />
           </Route>
         </Route>
+
 
       </Routes>
     </BrowserRouter>

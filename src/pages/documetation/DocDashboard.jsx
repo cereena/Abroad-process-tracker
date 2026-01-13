@@ -1,72 +1,33 @@
-import { useState } from "react";
+import StatCard from "../../components/doc/StatCard";
 
 export default function DocDashboard() {
-  const [studentId, setStudentId] = useState("");
-  const [status, setStatus] = useState("");
-
-  const updateDocStatus = async () => {
-    if (!studentId || !status) {
-      alert("Enter student ID and select status");
-      return;
-    }
-
-    try {
-      const token = localStorage.getItem("token");
-
-      const res = await fetch(
-        "http://localhost:5000/api/docs/update-status",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify({ studentId, status })
-        }
-      );
-
-      const data = await res.json();
-      alert(data.message || "Updated successfully");
-    } catch {
-      alert("Error updating status");
-    }
-  };
+  const stats = [
+    { title: "Pending Documents", count: 3, color: "bg-red-500" },
+    { title: "Visa Docs Ready", count: 1, color: "bg-orange-500" },
+    { title: "Application Submitted", count: 0, color: "bg-blue-600" },
+    { title: "Offer Letter Received", count: 0, color: "bg-green-600" },
+    { title: "Acceptance Letter Received", count: 0, color: "bg-emerald-600" },
+    { title: "Second Payment Done", count: 0, color: "bg-indigo-600" },
+    { title: "Final Payment Done", count: 0, color: "bg-purple-600" },
+    { title: "Visa File Submitted", count: 0, color: "bg-sky-600" },
+    { title: "Visa Success", count: 0, color: "bg-teal-600" },
+  ];
 
   return (
-    <div className="min-h-screen bg-orange-50 flex justify-center items-center p-6">
-      <div className="bg-white p-8 rounded-xl shadow-lg w-[420px]">
-        <h2 className="text-2xl font-bold text-blue-900 text-center">
-          Documentation Dashboard
-        </h2>
-        <p className="text-sm text-orange-600 text-center mb-6">
-          Manage student documents
+    <div className="p-6">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-800">
+          Welcome back, Documentation Executive!
+        </h1>
+        <p className="text-sm text-gray-500 mt-1">
+          Track student application progress at every stage
         </p>
+      </div>
 
-        <input
-          placeholder="Enter Student ID"
-          value={studentId}
-          onChange={(e) => setStudentId(e.target.value)}
-          className="w-full p-2 border rounded mb-4"
-        />
-
-        <select
-          value={status}
-          onChange={(e) => setStatus(e.target.value)}
-          className="w-full p-2 border rounded mb-4"
-        >
-          <option value="">Select Status</option>
-          <option>Documents Pending</option>
-          <option>Documents Verified</option>
-          <option>Sent to Embassy</option>
-          <option>Visa Approved</option>
-        </select>
-
-        <button
-          onClick={updateDocStatus}
-          className="w-full py-3 bg-orange-500 text-white rounded-lg font-semibold"
-        >
-          Update Status
-        </button>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+        {stats.map((s, i) => (
+          <StatCard key={i} {...s} />
+        ))}
       </div>
     </div>
   );

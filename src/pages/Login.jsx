@@ -30,10 +30,10 @@ const Login = () => {
       }
 
       if (role === "admin") {
-  console.log("Admin login success", data);
-  localStorage.setItem("adminId", data.admin.id);
-  navigate("/admin/dashboard");
-}
+        console.log("Admin login success", data);
+        localStorage.setItem("adminId", data.admin.id);
+        navigate("/admin/dashboard");
+      }
 
 
       if (role === "doc") {
@@ -95,11 +95,25 @@ const Login = () => {
         </div>
 
         <p className="mt-4 text-center text-sm">
-          New student?{" "}
-          <Link to="/register" className="text-orange-600 font-semibold">
-            Register
-          </Link>
+          {role === "student" && (
+            <>
+              New student?{" "}
+              <Link to="/register" className="text-orange-600 font-semibold">
+                Register
+              </Link>
+            </>
+          )}
+
+          {role === "doc" && (
+            <>
+              New Documentation Executive?{" "}
+              <Link to="/doc/register" className="text-orange-600 font-semibold">
+                Register
+              </Link>
+            </>
+          )}
         </p>
+
       </div>
     </div>
   );
