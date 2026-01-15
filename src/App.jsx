@@ -34,10 +34,13 @@ import DocDashboard from "./pages/documetation/DocDashboard.jsx";
 
 // Admin pages
 import AdminLayout from "./pages/admin/AdminLayout.jsx";
-import Students from "./pages/admin/Students.jsx";
 import Applications from "./pages/admin/Applications.jsx";
 import Universities_admin from "./pages/admin/Universities-admin.jsx";
 import Reports from "./pages/admin/Reports.jsx";
+import AdminNotifications from "./pages/admin/AdminNotifications.jsx";
+import AdminLeads from "./pages/admin/AdminLeads.jsx";
+import AddStudent from "./pages/admin/AddStudents.jsx";
+import Students from "./pages/admin/Students.jsx";
 
 
 import DocsTeam from "./pages/admin/DocsTeam.jsx";
@@ -47,7 +50,7 @@ import DocApplications from "./pages/documetation/DocApplications.jsx";
 import CourseFinder from "./pages/documetation/CourseFinder.jsx";
 import DocsCommission from "./pages/documetation/DocsCommission.jsx";
 import DocRegister from "./pages/documetation/DocRegister.jsx";
-import AdminNotifications from "./pages/admin/AdminNotifications.jsx";
+
 
 
 function App() {
@@ -72,12 +75,14 @@ function App() {
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />
             <Route path="dashboard" element={<AdminDashboard />} />
-            <Route path="students" element={<Students />} />
+            <Route path="/admin/students/add" element={<AddStudent />} />
             <Route path="applications" element={<Applications />} />
             <Route path="universities" element={<Universities_admin />} />
             <Route path="docs-team" element={<DocsTeam />} />
             <Route path="reports" element={<Reports />} />
             <Route path="/admin/notifications" element={<AdminNotifications/>} />
+            <Route path="/admin/leads" element={<AdminLeads/>} />
+            <Route path="/admin/students" element={<Students />} />
           </Route>
         </Route>
 

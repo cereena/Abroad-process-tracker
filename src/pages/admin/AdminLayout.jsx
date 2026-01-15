@@ -24,6 +24,8 @@ export default function AdminLayout() {
           <NavLink to="/admin/docs-team" className="block hover:text-orange-300">Docs Team</NavLink>
           <NavLink to="/admin/reports" className="block hover:text-orange-300">Reports</NavLink>
           <NavLink to="/admin/notifications" className="block hover:text-orange-300">Notifications</NavLink>
+          <NavLink to="/admin/leads" className="block hover:text-orange-300">Leads</NavLink>
+
         </nav>
       </aside>
 

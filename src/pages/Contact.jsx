@@ -92,17 +92,43 @@ const Contact = () => {
             </div>
 
             <div>
-              <label className="block text-blue-900 font-semibold mb-2">Country Preference</label>
+              <label className="block text-blue-900 font-semibold mb-2">Phone Number</label>
               <input
                 type="text"
-                name="Country Preference"
+                name="phone"
                 required
-                value={formData.country}
+                value={formData.phone}
                 onChange={handleChange}
-                placeholder="Eg: France, Poland"
-                className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                placeholder="Enter your phone number"
+                className="w-full border border-gray-300 rounded-lg p-3"
               />
             </div>
+
+            <div>
+              <label className="block text-blue-900 font-semibold mb-2">
+                Country Preference
+              </label>
+
+              <select
+                name="countryPreference"
+                required
+                value={formData.countryPreference}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-lg p-3 bg-white focus:outline-none focus:ring-2 focus:ring-orange-400"
+              >
+                <option value="">-- Select a country --</option>
+                <option value="Canada">Canada</option>
+                <option value="Australia">Australia</option>
+                <option value="UK">UK</option>
+                <option value="USA">USA</option>
+                <option value="Germany">Germany</option>
+                <option value="France">France</option>
+                <option value="Poland">Poland</option>
+                <option value="Ireland">Ireland</option>
+                <option value="New Zealand">New Zealand</option>
+              </select>
+            </div>
+
 
             <div>
               <label className="block text-blue-900 font-semibold mb-2">Message</label>

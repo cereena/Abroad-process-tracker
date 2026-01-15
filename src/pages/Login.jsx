@@ -104,14 +104,14 @@ const Login = () => {
             </>
           )}
 
-          {role === "doc" && (
+          {/* {role === "doc" && (
             <>
               New Documentation Executive?{" "}
               <Link to="/doc/register" className="text-orange-600 font-semibold">
                 Register
               </Link>
             </>
-          )}
+          )} */}
         </p>
 
       </div>

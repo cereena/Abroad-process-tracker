@@ -3,6 +3,14 @@ import { useState } from "react";
 export default function DocStudents() {
   const [search, setSearch] = useState("");
 
+  useEffect(() => {
+  fetch("http://localhost:5000/api/students/my", {
+    headers: { Authorization: `Bearer ${token}` }
+  })
+    .then(res => res.json())
+    .then(setStudents);
+}, []);
+
   const students = [
     {
       id: 1795,
