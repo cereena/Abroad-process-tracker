@@ -50,6 +50,7 @@ import DocApplications from "./pages/documetation/DocApplications.jsx";
 import CourseFinder from "./pages/documetation/CourseFinder.jsx";
 import DocsCommission from "./pages/documetation/DocsCommission.jsx";
 import DocRegister from "./pages/documetation/DocRegister.jsx";
+import AddExecutive from "./pages/admin/AddExecutive.jsx";
 
 
 
@@ -78,11 +79,12 @@ function App() {
             <Route path="/admin/students/add" element={<AddStudent />} />
             <Route path="applications" element={<Applications />} />
             <Route path="universities" element={<Universities_admin />} />
-            <Route path="docs-team" element={<DocsTeam />} />
+            <Route path="/admin/docs-team" element={<DocsTeam />} />
             <Route path="reports" element={<Reports />} />
             <Route path="/admin/notifications" element={<AdminNotifications/>} />
             <Route path="/admin/leads" element={<AdminLeads/>} />
             <Route path="/admin/students" element={<Students />} />
+            <Route path="/admin/docs-team/add" element={<AddExecutive />} />
           </Route>
         </Route>
 

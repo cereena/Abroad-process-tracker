@@ -22,22 +22,27 @@ const Login = () => {
             : "http://localhost:5000/api/doc/login";
 
       const { data } = await axios.post(url, { email, password });
+      console.log("Login response:", data); // 👈 add this line
 
-      // Save user based on role
+      // Student
       if (role === "student") {
         localStorage.setItem("studentId", data.student.id);
+        localStorage.setItem("userToken", data.token); // ✅ save token for students if backend returns it
         navigate("/dashboard");
       }
 
+      // Admin
       if (role === "admin") {
-        console.log("Admin login success", data);
-        localStorage.setItem("adminId", data.admin.id);
+        localStorage.setItem("adminId", data.user.id); // <-- use `data.user.id`
+        localStorage.setItem("userToken", data.token);
         navigate("/admin/dashboard");
       }
 
 
+      // Documentation Executive
       if (role === "doc") {
-        localStorage.setItem("docId", data.doc.id);
+        localStorage.setItem("docId", data.user.id);
+        localStorage.setItem("userToken", data.token);
         navigate("/doc/dashboard");
       }
 

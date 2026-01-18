@@ -150,7 +150,7 @@ export default function AdminLeads() {
                                                 disabled={lead.status !== "Registered"}
                                                 onClick={() => addStudent(lead)}
                                                 className={`px-4 py-1.5 text-xs rounded-md whitespace-nowrap
-    ${lead.status === "Registered"
+                                                        ${lead.status === "Registered"
                                                         ? "bg-blue-600 text-white hover:bg-blue-700"
                                                         : "bg-gray-400 text-white cursor-not-allowed"}`}
                                             >
