@@ -13,15 +13,14 @@ function DocsTeam() {
     fetchStudents();
   }, []);
 
-
   const fetchExecutives = async () => {
     try {
       const res = await axios.get(
         "http://localhost:5000/api/doc-executives/all",
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("adminToken")}`
-          }
+            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+          },
         }
       );
       setExecutives(res.data);
@@ -31,15 +30,14 @@ function DocsTeam() {
     }
   };
 
-  // ✅ FETCH UNASSIGNED STUDENTS
   const fetchStudents = async () => {
     try {
       const res = await axios.get(
         "http://localhost:5000/api/student/unassigned",
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("adminToken")}`
-          }
+            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+          },
         }
       );
       setStudents(res.data);
@@ -48,7 +46,6 @@ function DocsTeam() {
     }
   };
 
-  // ✅ ASSIGN STUDENT
   const assignStudent = async () => {
     if (!selectedStudent || !selectedExec) return;
 
@@ -57,12 +54,12 @@ function DocsTeam() {
         "http://localhost:5000/api/student/assign",
         {
           studentId: selectedStudent,
-          executiveId: selectedExec._id
+          executiveId: selectedExec._id,
         },
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("adminToken")}`
-          }
+            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+          },
         }
       );
 
@@ -80,88 +77,106 @@ function DocsTeam() {
   return (
     <div className="p-6">
       {/* HEADER */}
-      <div className="flex justify-between items-center mb-5">
+      <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-blue-900">
           Documentation Team
         </h2>
 
         <NavLink
           to="/admin/docs-team/add"
-          className="bg-orange-600 text-white px-4 py-2 rounded"
+          className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded text-sm font-medium"
         >
           + Add Executive
         </NavLink>
       </div>
 
-      {/* EXEC TABLE */}
-      <div className="bg-white shadow rounded-lg overflow-hidden">
+      {/* EXECUTIVE TABLE */}
+      <div className="bg-white shadow rounded-lg overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-blue-50 text-blue-900">
             <tr>
-              <th className="p-3 text-left">Executive</th>
-              <th className="p-3">Countries</th>
-              <th className="p-3">Assigned Students</th>
-              <th className="p-3">Action</th>
+              <th className="p-3 text-left">Name</th>
+              <th className="p-3 text-left">Email</th>
+              <th className="p-3 text-left">Branch</th>
+              <th className="p-3 text-center">Countries</th>
+              <th className="p-3 text-center">Students</th>
+              <th className="p-3 text-center">Action</th>
             </tr>
           </thead>
           <tbody>
             {executives.map((exec) => (
-              <tr key={exec._id} className="border-b">
+              <tr key={exec._id} className="border-b hover:bg-gray-50">
                 <td className="p-3 font-medium">{exec.name}</td>
-                <td className="p-3 text-center">
-                  {exec.countriesHandled?.join(", ")}
+                <td className="p-3 text-gray-700">{exec.email}</td>
+                <td className="p-3 text-gray-700">{exec.branch || "—"}</td>
+                <td className="p-3 text-center text-gray-600">
+                  {exec.countriesHandled?.join(", ") || "—"}
                 </td>
-                <td className="p-3 text-center">
+                <td className="p-3 text-center font-semibold">
                   {exec.assignedStudents?.length || 0}
                 </td>
                 <td className="p-3 text-center">
                   <button
                     onClick={() => setSelectedExec(exec)}
-                    className="bg-blue-700 text-white px-3 py-1 rounded text-xs"
+                    className="bg-blue-700 hover:bg-blue-800 text-white px-3 py-1 rounded text-xs"
                   >
                     Assign Student
                   </button>
                 </td>
               </tr>
             ))}
+
+            {executives.length === 0 && (
+              <tr>
+                <td colSpan="6" className="p-4 text-center text-gray-500">
+                  No documentation executives found
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
 
       {/* ASSIGN MODAL */}
       {selectedExec && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg w-[420px]">
-            <h3 className="text-lg font-bold text-blue-900 mb-3">
-              Assign Student to {selectedExec.name}
+            <h3 className="text-lg font-bold text-blue-900 mb-1">
+              Assign Student
             </h3>
+            <p className="text-sm text-gray-600 mb-4">
+              {selectedExec.name} • {selectedExec.branch || "Branch N/A"}
+            </p>
 
             <select
-              className="w-full border p-2 rounded mb-4"
+              className="w-full border p-2 rounded mb-4 text-sm"
               value={selectedStudent}
               onChange={(e) => setSelectedStudent(e.target.value)}
             >
               <option value="">Select Student</option>
               {students
-                .filter(s => selectedExec.countriesHandled?.includes(s.countryPreference))
-                .map(s => (
+                .filter((s) =>
+                  selectedExec.countriesHandled?.includes(
+                    s.countryPreference
+                  )
+                )
+                .map((s) => (
                   <option key={s._id} value={s._id}>
                     {s.name} — {s.countryPreference}
                   </option>
                 ))}
-
             </select>
 
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setSelectedExec(null)}
-                className="px-4 py-2 border rounded"
+                className="px-4 py-2 border rounded text-sm"
               >
                 Cancel
               </button>
               <button
                 onClick={assignStudent}
-                className="px-4 py-2 bg-orange-600 text-white rounded"
+                className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded text-sm"
               >
                 Assign
               </button>

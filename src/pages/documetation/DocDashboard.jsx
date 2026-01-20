@@ -13,6 +13,11 @@ export default function DocDashboard() {
     { title: "Visa Success", count: 0, color: "bg-teal-600" },
   ];
 
+  const handleLogout = () => {
+  localStorage.clear();
+  navigate("/login");
+};
+
   return (
     <div className="p-6">
       <div className="mb-6">

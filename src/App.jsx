@@ -67,7 +67,6 @@ function App() {
           <Route path="/courses" element={<Courses />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/doc/register" element={<DocRegister />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
         </Route>
 
@@ -89,14 +88,14 @@ function App() {
         </Route>
 
         {/* ================= Documentation ================= */}
-        <Route element={<RoleRoute role="doc" />}>
-          <Route path="/doc" element={<DocLayout />}>
+        <Route element={<RoleRoute role="docExecutive" />}>
+          <Route path="/docExecutive" element={<DocLayout />}>
             <Route index element={<DocDashboard />} />
-            <Route path="dashboard" element={<DocDashboard />} />
-            <Route path="students" element={<DocStudents />} />
-            <Route path="applications" element={<DocApplications />} />
-            <Route path="commission" element={<DocsCommission />} />
-            <Route path="course-finder" element={<CourseFinder />} />
+            <Route path="/docExecutive/dashboard" element={<DocDashboard />} />
+            <Route path="/docExecutive/students" element={<DocStudents />} />
+            <Route path="/docExecutive/applications" element={<DocApplications />} />
+            <Route path="/docExecutive/commission" element={<DocsCommission />} />
+            <Route path="/docExecutive/course-finder" element={<CourseFinder />} />
           </Route>
         </Route>
 

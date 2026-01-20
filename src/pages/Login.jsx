@@ -37,9 +37,9 @@ const Login = () => {
       }
 
       // Documentation Executive
-      if (role === "doc") {
+      if (role === "docExecutive") {
         localStorage.setItem("docToken", data.token);
-        navigate("/doc/dashboard");
+        navigate("/docExecutive/dashboard");
       }
 
       alert("Login successful");
@@ -64,7 +64,7 @@ const Login = () => {
           >
             <option value="student">Student</option>
             <option value="admin">Admin</option>
-            <option value="doc">Documentation Executive</option>
+            <option value="docExecutive">Documentation Executive</option>
           </select>
 
           <input

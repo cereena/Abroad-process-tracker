@@ -62,7 +62,7 @@ export default function Students() {
 
                   {/* ✅ Enquiry Code (FIXED FIELD NAME IF NEEDED) */}
                   <td className="px-4 py-2 font-mono text-blue-700">
-                    {student.enquiryCode || "—"}
+                    {student.studentEnquiryCode || "—"}
                   </td>
 
                   <td className="px-4 py-2">{student.name}</td>

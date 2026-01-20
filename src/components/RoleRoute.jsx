@@ -1,15 +1,17 @@
 import { Navigate, Outlet } from "react-router-dom";
 
 const RoleRoute = ({ role }) => {
-  const adminId = localStorage.getItem("adminId");
-  const studentId = localStorage.getItem("studentId");
-  const docId = localStorage.getItem("docId");
+  let token = null;
 
-  if (role === "admin" && adminId) return <Outlet />;
-  if (role === "student" && studentId) return <Outlet />;
-  if (role === "doc" && docId) return <Outlet />;
+  if (role === "admin") token = localStorage.getItem("adminToken");
+  if (role === "docExecutive") token = localStorage.getItem("docToken");
+  if (role === "student") token = localStorage.getItem("studentToken");
 
-  return <Navigate to="/login" replace />;
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <Outlet />;
 };
 
 export default RoleRoute;
