@@ -22,27 +22,23 @@ const Login = () => {
             : "http://localhost:5000/api/doc/login";
 
       const { data } = await axios.post(url, { email, password });
-      console.log("Login response:", data); // 👈 add this line
+      console.log("Login response:", data);
 
       // Student
       if (role === "student") {
-        localStorage.setItem("studentId", data.student.id);
-        localStorage.setItem("userToken", data.token); // ✅ save token for students if backend returns it
+        localStorage.setItem("studentToken", data.token);
         navigate("/dashboard");
       }
 
       // Admin
       if (role === "admin") {
-        localStorage.setItem("adminId", data.user.id); // <-- use `data.user.id`
-        localStorage.setItem("userToken", data.token);
+        localStorage.setItem("adminToken", data.token);
         navigate("/admin/dashboard");
       }
 
-
       // Documentation Executive
       if (role === "doc") {
-        localStorage.setItem("docId", data.user.id);
-        localStorage.setItem("userToken", data.token);
+        localStorage.setItem("docToken", data.token);
         navigate("/doc/dashboard");
       }
 
@@ -51,7 +47,6 @@ const Login = () => {
       alert(error.response?.data?.message || "Login failed");
     }
   };
-
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-orange-100 px-4">
@@ -108,15 +103,6 @@ const Login = () => {
               </Link>
             </>
           )}
-
-          {/* {role === "doc" && (
-            <>
-              New Documentation Executive?{" "}
-              <Link to="/doc/register" className="text-orange-600 font-semibold">
-                Register
-              </Link>
-            </>
-          )} */}
         </p>
 
       </div>

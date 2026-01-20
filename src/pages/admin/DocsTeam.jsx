@@ -13,14 +13,14 @@ function DocsTeam() {
     fetchStudents();
   }, []);
 
-  
+
   const fetchExecutives = async () => {
     try {
       const res = await axios.get(
         "http://localhost:5000/api/doc-executives/all",
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("userToken")}`
+            Authorization: `Bearer ${localStorage.getItem("adminToken")}`
           }
         }
       );
@@ -38,7 +38,7 @@ function DocsTeam() {
         "http://localhost:5000/api/student/unassigned",
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("userToken")}`
+            Authorization: `Bearer ${localStorage.getItem("adminToken")}`
           }
         }
       );
@@ -61,7 +61,7 @@ function DocsTeam() {
         },
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("userToken")}`
+            Authorization: `Bearer ${localStorage.getItem("adminToken")}`
           }
         }
       );
@@ -142,11 +142,14 @@ function DocsTeam() {
               onChange={(e) => setSelectedStudent(e.target.value)}
             >
               <option value="">Select Student</option>
-              {students.map((s) => (
-                <option key={s._id} value={s._id}>
-                  {s.name} — {s.countryPreference}
-                </option>
-              ))}
+              {students
+                .filter(s => selectedExec.countriesHandled?.includes(s.countryPreference))
+                .map(s => (
+                  <option key={s._id} value={s._id}>
+                    {s.name} — {s.countryPreference}
+                  </option>
+                ))}
+
             </select>
 
             <div className="flex justify-end gap-3">

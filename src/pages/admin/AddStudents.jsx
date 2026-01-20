@@ -1,5 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import axios from "axios";
 
 export default function AddStudent() {
     const { state: lead } = useLocation();
@@ -14,13 +15,18 @@ export default function AddStudent() {
         assignedTo: ""
     });
 
-    // 🔐 safety: if no lead, go back
+    //  safety: if no lead, go back
     useEffect(() => {
         if (!lead) {
             navigate("/admin/leads");
             return;
         }
 
+        if (lead.isStudentCreated) {
+            alert("Student already created for this lead");
+            navigate("/admin/leads");
+            return;
+        }
         setForm({
             name: lead.name,
             email: lead.email,
@@ -29,27 +35,55 @@ export default function AddStudent() {
             assignedTo: ""
         });
 
-        fetch("http://localhost:5000/api/users/executives")
+        fetch("http://localhost:5000/api/doc-executives/all", {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("adminToken")}`
+            }
+        })
             .then(res => res.json())
-            .then(setExecutives);
+            .then(data => {
+                console.log("RAW EXECUTIVES FROM API:", data);
 
+                const filtered = data.filter(exec =>
+                    Array.isArray(exec.countriesHandled) &&
+                    exec.countriesHandled.some(
+                        c => c.toLowerCase() === lead.countryPreference.toLowerCase()
+                    )
+                );
+
+                setExecutives(filtered);
+            });
     }, [lead, navigate]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const res = await fetch("http://localhost:5000/api/students", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                ...form,
-                leadId: lead._id
-            })
-        });
+        try {
+            await axios.post(
+                "http://localhost:5000/api/student",
+                {
+                    leadId: lead._id,
+                    assignedTo: form.assignedTo
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+                        "Content-Type": "application/json"
+                    }
+                }
+            );
 
-        if (res.ok) {
             alert("Student created successfully");
             navigate("/admin/students");
+
+        } catch (err) {
+            if (err.response?.status === 409) {
+                alert("Student already exists");
+                navigate("/admin/leads");
+            } else {
+                console.error("CREATE STUDENT ERROR:", err.response?.data || err.message);
+                alert("Failed to create student");
+            }
         }
     };
 

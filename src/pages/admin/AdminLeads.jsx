@@ -39,30 +39,31 @@ export default function AdminLeads() {
     return (
         <div className="space-y-6">
 
-            {/* 🔷 HEADER */}
-            <div className="flex items-center justify-between">
-                {/* 🔢 TOTAL LEADS BAR */}
-                <div className="flex items-center justify-between bg-white border rounded-xl shadow-sm px-6 py-3">
+            {/* HEADER */}
+            <div className="flex flex-wrap items-center justify-between gap-4">
+                {/* TOTAL */}
+                <div className="bg-white border rounded-xl px-5 py-2 shadow-sm">
                     <p className="text-sm text-gray-600">
-                        Total Leads : <span className="text-l px-3 py-1 rounded-full bg-blue-100 text-blue-700 font-semibold">
-                            {totalCount}  </span>
+                        Total Leads
+                        <span className="ml-2 px-3 py-1 rounded-full bg-blue-50 text-blue-700 font-semibold">
+                            {totalCount}
+                        </span>
                     </p>
-
-
                 </div>
 
-                <h1 className="text-2xl font-bold text-blue-900">Leads</h1>
+                <h1 className="text-2xl font-bold text-gray-800">Leads</h1>
 
-                {/* FILTER PILLS */}
-                <div className="flex bg-white rounded-full shadow-sm border p-1">
-                    {["All", "Registered", "Not Registered"].map(f => (
+                {/* FILTER */}
+                <div className="flex bg-white border rounded-lg p-1 shadow-sm">
+                    {["All", "Not Registered"].map(f => (
                         <button
                             key={f}
                             onClick={() => setFilter(f)}
-                            className={`px-4 py-1.5 text-sm rounded-full transition
-                ${filter === f
-                                    ? "bg-blue-900 text-white shadow"
-                                    : "text-gray-600 hover:bg-gray-100"}`}
+                            className={`px-4 py-1.5 text-sm rounded-md transition
+                                    ${filter === f
+                                    ? "bg-blue-600 text-white"
+                                    : "text-gray-600 hover:bg-gray-100"
+                                }`}
                         >
                             {f}
                         </button>
@@ -70,19 +71,19 @@ export default function AdminLeads() {
                 </div>
             </div>
 
-            {/* 📋 TABLE CARD */}
-            <div className="bg-white rounded-2xl shadow-md border overflow-hidden ">
+            {/* TABLE */}
+            <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
 
                 <div className="overflow-x-auto">
-                    <table className="w-full text-sm table-fixed">
-                        <thead className="bg-blue-900 text-white">
+                    <table className="w-full text-sm">
+                        <thead className="bg-blue-800 text-white">
                             <tr>
-                                <th className="px-6 py-4 text-left w-[18%]">Student</th>
-                                <th className="px-6 py-4 text-left w-[22%]">Email</th>
-                                <th className="px-6 py-4 text-left w-[15%]">Phone</th>
-                                <th className="px-6 py-4 text-left w-[15%]">Country</th>
-                                <th className="px-6 py-4 text-center w-[15%]">Status</th>
-                                <th className="px-6 py-4 text-center w-[15%]">Actions</th>
+                                <th className="px-6 py-3 text-left">Student</th>
+                                <th className="px-6 py-3 text-left">Email</th>
+                                <th className="px-6 py-3 text-left">Phone</th>
+                                <th className="px-6 py-3 text-left">Country</th>
+                                <th className="px-6 py-3 text-center">Status</th>
+                                <th className="px-6 py-3 text-center">Actions</th>
                             </tr>
                         </thead>
 
@@ -90,7 +91,7 @@ export default function AdminLeads() {
                             {filteredLeads.map(lead => (
                                 <tr
                                     key={lead._id}
-                                    className="border-b last:border-none hover:bg-gray-50"
+                                    className="border-t hover:bg-gray-50 transition"
                                 >
                                     {/* STUDENT */}
                                     <td className="px-6 py-4 font-medium text-gray-800">
@@ -98,69 +99,75 @@ export default function AdminLeads() {
                                     </td>
 
                                     {/* EMAIL */}
-                                    <td className="px-6 py-4 truncate">
+                                    <td className="px-6 py-4 text-gray-600">
                                         {lead.email}
                                     </td>
 
                                     {/* PHONE */}
-                                    <td className="px-6 py-4">
+                                    <td className="px-6 py-4 text-gray-600">
                                         {lead.phone}
                                     </td>
 
                                     {/* COUNTRY */}
-                                    <td className="px-6 py-4">
+                                    <td className="px-6 py-4 text-gray-600">
                                         {lead.countryPreference}
                                     </td>
 
                                     {/* STATUS */}
                                     <td className="px-6 py-4 text-center">
                                         <span
-                                            className={`inline-flex items-center justify-center px-4 py-1 rounded text-xs font-semibold
+                                            className={`px-3 py-1 rounded-full text-xs font-medium
                                                     ${lead.status === "Registered"
-                                                    ? "bg-green-100 text-green-700"
-                                                    : "bg-orange-100 text-red-700"}`}
+                                                    ? "bg-green-50 text-green-700"
+                                                    : lead.status === "Student Created"
+                                                        ? "bg-blue-50 text-blue-700"
+                                                        : "bg-orange-50 text-orange-700"
+                                                }`}
                                         >
                                             {lead.status}
                                         </span>
                                     </td>
-                                    
+
                                     {/* ACTIONS */}
                                     <td className="px-6 py-4">
-                                        <div className="flex items-center justify-center gap-3">
+                                        <div className="flex items-center justify-center gap-2">
 
-                                            {/* TOGGLE REGISTER STATUS */}
-                                            {lead.status === "Registered" ? (
-                                                <button
-                                                    onClick={() => updateStatus(lead._id, "Not Registered")}
-                                                    className="px-4 py-1.5 text-xs rounded-md bg-orange-500 text-white hover:bg-orange-600 whitespace-nowrap"
-                                                >
-                                                    Unregister
-                                                </button>
-                                            ) : (
-                                                <button
-                                                    onClick={() => updateStatus(lead._id, "Registered")}
-                                                    className="px-4 py-1.5 text-xs rounded-md bg-green-600 text-white hover:bg-green-700 whitespace-nowrap"
-                                                >
-                                                    Register
-                                                </button>
+                                            {/* REGISTER / UNREGISTER */}
+                                            {!lead.isStudentCreated && (
+                                                lead.status === "Registered" ? (
+                                                    <button
+                                                        onClick={() => updateStatus(lead._id, "Not Registered")}
+                                                        className="px-3 py-1.5 text-xs rounded-md border text-orange-700 border-orange-300 hover:bg-orange-50"
+                                                    >
+                                                        Unregister
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => updateStatus(lead._id, "Registered")}
+                                                        className="px-3 py-1.5 text-xs rounded-md border text-black-500 border-black"
+                                                    >
+                                                        Register
+                                                    </button>
+                                                )
                                             )}
 
                                             {/* ADD STUDENT */}
                                             <button
-                                                disabled={lead.status !== "Registered"}
+                                                disabled={lead.isStudentCreated || lead.status !== "Registered"}
                                                 onClick={() => addStudent(lead)}
-                                                className={`px-4 py-1.5 text-xs rounded-md whitespace-nowrap
-                                                        ${lead.status === "Registered"
-                                                        ? "bg-blue-600 text-white hover:bg-blue-700"
-                                                        : "bg-gray-400 text-white cursor-not-allowed"}`}
+                                                className={`px-3 py-1.5 text-xs rounded-md font-medium
+                                                        ${lead.isStudentCreated
+                                                        ? "bg-green-100 text-green-700 cursor-not-allowed"
+                                                        : lead.status === "Registered"
+                                                            ? "bg-blue-600 text-white hover:bg-blue-600"
+                                                            : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                                                    }`}
                                             >
-                                                Add Student
+                                                {lead.isStudentCreated ? "Student Added" : "Add Student"}
                                             </button>
-
 
                                         </div>
                                     </td>
-
 
                                 </tr>
                             ))}

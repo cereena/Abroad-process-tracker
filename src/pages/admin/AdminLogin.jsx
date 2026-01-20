@@ -13,8 +13,7 @@ export default function AdminLogin() {
       email, password
     });
 
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("role", data.user.role);
+    localStorage.setItem("adminToken", data.token);
 
     nav("/admin/dashboard");
   };
