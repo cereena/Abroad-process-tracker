@@ -23,6 +23,7 @@ import Payments from "./pages/student/Payments.jsx";
 import Visa from "./pages/student/Visa.jsx";
 import Profile from "./pages/student/Profile.jsx";
 import StudentApplications from "./pages/student/StudentApplication.jsx";
+import StudentLayout from "./layouts/StudentLayout.jsx";
 
 // Admin
 import AdminDashboard from "./pages/admin/AdminDashboard.jsx";
@@ -49,8 +50,9 @@ import DocStudents from "./pages/documetation/DocStudents.jsx";
 import DocApplications from "./pages/documetation/DocApplications.jsx";
 import CourseFinder from "./pages/documetation/CourseFinder.jsx";
 import DocsCommission from "./pages/documetation/DocsCommission.jsx";
-import DocRegister from "./pages/documetation/DocRegister.jsx";
 import AddExecutive from "./pages/admin/AddExecutive.jsx";
+import StudentProfileGuard from "./pages/student/studentProfileGuard.jsx";
+
 
 
 
@@ -80,8 +82,8 @@ function App() {
             <Route path="universities" element={<Universities_admin />} />
             <Route path="/admin/docs-team" element={<DocsTeam />} />
             <Route path="reports" element={<Reports />} />
-            <Route path="/admin/notifications" element={<AdminNotifications/>} />
-            <Route path="/admin/leads" element={<AdminLeads/>} />
+            <Route path="/admin/notifications" element={<AdminNotifications />} />
+            <Route path="/admin/leads" element={<AdminLeads />} />
             <Route path="/admin/students" element={<Students />} />
             <Route path="/admin/docs-team/add" element={<AddExecutive />} />
           </Route>
@@ -100,9 +102,9 @@ function App() {
         </Route>
 
         {/* ================= STUDENT DASHBOARD ================= */}
-        <Route element={<ProtectedRoute />}>
-          <Route element={<DashboardLayout />}>
-            <Route path="/dashboard" element={<Dashboard />} />
+        <Route element={<ProtectedRoute role="student" />}>
+          <Route element={<StudentLayout />}>
+            <Route path="/dashboard" element={<StudentProfileGuard><Dashboard/></StudentProfileGuard>} />
             <Route path="/applications" element={<StudentApplications />} />
             <Route path="/documents" element={<Documents />} />
             <Route path="/payments" element={<Payments />} />
@@ -112,7 +114,6 @@ function App() {
             <Route path="/notifications" element={<Notifications />} />
           </Route>
         </Route>
-
 
       </Routes>
     </BrowserRouter>

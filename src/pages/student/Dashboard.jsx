@@ -1,12 +1,29 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function Dashboard() {
+
+  const [profileCompleted, setProfileCompleted] = useState(null);
+
   const studentId = localStorage.getItem("studentId");
 
-  if (!studentId) {
-    window.location.href = "/login";
-  }
+  const navigate = useNavigate();
 
+  useEffect(() => {
+    fetch("http://localhost:5000/api/student/profile-status", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("studentToken")}`,
+      },
+    })
+      .then(res => res.json())
+      .then(data => setProfileCompleted(data.profileCompleted))
+      .catch(() => navigate("/login"));
+  }, []);
+
+
+  useEffect(() => {
+    if (!studentId) navigate("/login");
+  }, [studentId]);
   const [progress, setProgress] = useState([]);
 
   useEffect(() => {
@@ -37,6 +54,26 @@ function Dashboard() {
     { title: "Final Payment", key: "Final Approval" },
   ];
 
+  if (profileCompleted === false) {
+    return (
+      <div className="bg-yellow-50 border border-yellow-200 p-6 rounded-xl mt-6">
+        <h2 className="font-semibold text-yellow-800">
+          Complete your profile to continue
+        </h2>
+        <p className="text-sm text-yellow-600 mt-2">
+          Your dashboard will unlock once your profile is complete.
+        </p>
+
+        <button
+          onClick={() => navigate("/profile")}
+          className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg"
+        >
+          Go to Profile
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8 mx-3 mb-6">
       {/* Header */}
@@ -58,7 +95,7 @@ function Dashboard() {
 
       {/* Progress + Payments */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        
+
         {/* Application Progress */}
         <div className="bg-white rounded-xl p-6 shadow">
           <h2 className="text-lg font-semibold text-blue-800 mb-6">
@@ -80,9 +117,8 @@ function Dashboard() {
 
                   <div>
                     <p
-                      className={`font-medium ${
-                        completed ? "text-blue-900" : "text-gray-500"
-                      }`}
+                      className={`font-medium ${completed ? "text-blue-900" : "text-gray-500"
+                        }`}
                     >
                       {step}
                     </p>
@@ -123,8 +159,8 @@ function Dashboard() {
                   <span
                     className={`text-xs px-3 py-1 rounded-full font-semibold
                     ${done
-                      ? "bg-green-100 text-green-600"
-                      : "bg-orange-100 text-orange-600"}`}
+                        ? "bg-green-100 text-green-600"
+                        : "bg-orange-100 text-orange-600"}`}
                   >
                     {done ? "Paid" : "Pending"}
                   </span>
