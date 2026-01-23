@@ -1,9 +1,13 @@
 // src/App.jsx
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 // Layouts
 import MainLayout from "./layouts/MainLayout.jsx";
-import DashboardLayout from "./layouts/DashboardLayout.jsx";
+import StudentLayout from "./layouts/StudentLayout.jsx";
+import AdminLayout from "./pages/admin/AdminLayout.jsx";
+import DocLayout from "./layouts/DocLayout.jsx";
 
 // Public Pages
 import Home from "./pages/Home.jsx";
@@ -14,27 +18,8 @@ import Register from "./pages/Register.jsx";
 import Login from "./pages/Login.jsx";
 import ForgotPassword from "./pages/ForgotPassword.jsx";
 
-// Student Pages
-import Dashboard from "./pages/student/Dashboard.jsx";
-import Documents from "./pages/student/Documents.jsx";
-import Universities from "./pages/student/Universities.jsx";
-import Notifications from "./pages/student/Notifications.jsx";
-import Payments from "./pages/student/Payments.jsx";
-import Visa from "./pages/student/Visa.jsx";
-import Profile from "./pages/student/Profile.jsx";
-import StudentApplications from "./pages/student/StudentApplication.jsx";
-import StudentLayout from "./layouts/StudentLayout.jsx";
-
-// Admin
+// Admin Pages
 import AdminDashboard from "./pages/admin/AdminDashboard.jsx";
-
-// Route Protection
-import ProtectedRoute from "./components/ProtectedRoute.jsx";
-import RoleRoute from "./components/RoleRoute.jsx";
-import DocDashboard from "./pages/documetation/DocDashboard.jsx";
-
-// Admin pages
-import AdminLayout from "./pages/admin/AdminLayout.jsx";
 import Applications from "./pages/admin/Applications.jsx";
 import Universities_admin from "./pages/admin/Universities-admin.jsx";
 import Reports from "./pages/admin/Reports.jsx";
@@ -42,34 +27,58 @@ import AdminNotifications from "./pages/admin/AdminNotifications.jsx";
 import AdminLeads from "./pages/admin/AdminLeads.jsx";
 import AddStudent from "./pages/admin/AddStudents.jsx";
 import Students from "./pages/admin/Students.jsx";
-
-
 import DocsTeam from "./pages/admin/DocsTeam.jsx";
-import DocLayout from "./layouts/DocLayout.jsx";
+import AddExecutive from "./pages/admin/AddExecutive.jsx";
+
+// Documentation Executive Pages
+import DocDashboard from "./pages/documetation/DocDashboard.jsx";
 import DocStudents from "./pages/documetation/DocStudents.jsx";
 import DocApplications from "./pages/documetation/DocApplications.jsx";
 import CourseFinder from "./pages/documetation/CourseFinder.jsx";
 import DocsCommission from "./pages/documetation/DocsCommission.jsx";
-import AddExecutive from "./pages/admin/AddExecutive.jsx";
+
+// student pages
+import StudentProfileGaurd from "./pages/student/studentProfileGuard.jsx";
+import Dashboard from "./pages/student/Dashboard.jsx";
+import StudentApplications from "./pages/student/StudentApplication.jsx";
+import Documents from "./pages/student/Documents.jsx";
+import Payments from "./pages/student/Payments.jsx";
+import Profile from "./pages/student/Profile.jsx";
+import Universities from "./pages/student/Universities.jsx";
+import Visa from "./pages/student/Visa.jsx";
+import Notifications from "./pages/student/Notifications.jsx";
+
+
+// Route Protection
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import RoleRoute from "./components/RoleRoute.jsx";
+import DocStudentProfile from "./pages/documetation/DocStudentProfile.jsx";
 import StudentProfileGuard from "./pages/student/studentProfileGuard.jsx";
-
-
-
+import DocExecutiveNotifications from "./pages/documetation/DocNotification.jsx";
 
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
+      {/* ✅ Toast must be outside Routes */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        pauseOnHover
+      />
 
+      <Routes>
         {/* ================= PUBLIC WEBSITE ================= */}
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/courses" element={<Courses />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="about" element={<About />} />
+          <Route path="contact" element={<Contact />} />
+          <Route path="courses" element={<Courses />} />
+          <Route path="register" element={<Register />} />
+          <Route path="login" element={<Login />} />
+          <Route path="forgot-password" element={<ForgotPassword />} />
         </Route>
 
         {/* ================= ADMIN ================= */}
@@ -77,43 +86,51 @@ function App() {
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />
             <Route path="dashboard" element={<AdminDashboard />} />
-            <Route path="/admin/students/add" element={<AddStudent />} />
+            <Route path="students/add" element={<AddStudent />} />
+            <Route path="students" element={<Students />} />
+            <Route path="docs-team" element={<DocsTeam />} />
+            <Route path="docs-team/add" element={<AddExecutive />} />
             <Route path="applications" element={<Applications />} />
             <Route path="universities" element={<Universities_admin />} />
-            <Route path="/admin/docs-team" element={<DocsTeam />} />
             <Route path="reports" element={<Reports />} />
-            <Route path="/admin/notifications" element={<AdminNotifications />} />
-            <Route path="/admin/leads" element={<AdminLeads />} />
-            <Route path="/admin/students" element={<Students />} />
-            <Route path="/admin/docs-team/add" element={<AddExecutive />} />
+            <Route path="notifications" element={<AdminNotifications />} />
+            <Route path="leads" element={<AdminLeads />} />
+            <Route path="/admin/students/:id" element={<DocStudentProfile />} />
           </Route>
         </Route>
 
-        {/* ================= Documentation ================= */}
+        {/* ================= DOCUMENTATION EXECUTIVE ================= */}
         <Route element={<RoleRoute role="docExecutive" />}>
           <Route path="/docExecutive" element={<DocLayout />}>
             <Route index element={<DocDashboard />} />
-            <Route path="/docExecutive/dashboard" element={<DocDashboard />} />
-            <Route path="/docExecutive/students" element={<DocStudents />} />
-            <Route path="/docExecutive/applications" element={<DocApplications />} />
-            <Route path="/docExecutive/commission" element={<DocsCommission />} />
-            <Route path="/docExecutive/course-finder" element={<CourseFinder />} />
+            <Route path="dashboard" element={<DocDashboard />} />
+            <Route path="students" element={<DocStudents />} />
+            <Route path="applications" element={<DocApplications />} />
+            <Route path="commission" element={<DocsCommission />} />
+            <Route path="course-finder" element={<CourseFinder />} />
+            <Route path="/docExecutive/students/:id" element={<DocStudentProfile />} />
+            <Route path="notification" element={<DocExecutiveNotifications />} />
           </Route>
         </Route>
 
-        {/* ================= STUDENT DASHBOARD ================= */}
-        <Route element={<ProtectedRoute role="student" />}>
-          <Route element={<StudentLayout />}>
-            <Route path="/dashboard" element={<StudentProfileGuard><Dashboard/></StudentProfileGuard>} />
-            <Route path="/applications" element={<StudentApplications />} />
-            <Route path="/documents" element={<Documents />} />
-            <Route path="/payments" element={<Payments />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/universities" element={<Universities />} />
-            <Route path="/visa" element={<Visa />} />
-            <Route path="/notifications" element={<Notifications />} />
+
+        <Route path="/student/login" element={<Login />} />
+        <Route path="/student" element={<StudentLayout />}>
+          <Route element={<ProtectedRoute role="student" />}>
+            <Route path="profile" element={<Profile />} />
+            <Route element={<StudentProfileGuard />}>
+              <Route path="/student/dashboard" element={<Dashboard />} />
+              <Route path="applications" element={<StudentApplications />} />
+              <Route path="documents" element={<Documents />} />
+              <Route path="payments" element={<Payments />} />
+              <Route path="universities" element={<Universities />} />
+              <Route path="visa" element={<Visa />} />
+              <Route path="notifications" element={<Notifications />} />
+            </Route>
           </Route>
         </Route>
+
+
 
       </Routes>
     </BrowserRouter>

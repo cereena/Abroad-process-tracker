@@ -12,17 +12,20 @@ function Dashboard() {
   useEffect(() => {
     fetch("http://localhost:5000/api/student/profile-status", {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("studentToken")}`,
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
     })
       .then(res => res.json())
       .then(data => setProfileCompleted(data.profileCompleted))
-      .catch(() => navigate("/login"));
+      .catch(err => {
+        console.error("Profile status error", err);
+        setProfileCompleted(false);
+      });
   }, []);
 
 
   useEffect(() => {
-    if (!studentId) navigate("/login");
+    if (!studentId) navigate("/student/login");
   }, [studentId]);
   const [progress, setProgress] = useState([]);
 
@@ -65,7 +68,7 @@ function Dashboard() {
         </p>
 
         <button
-          onClick={() => navigate("/profile")}
+          onClick={() => navigate("/student/profile")}
           className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg"
         >
           Go to Profile

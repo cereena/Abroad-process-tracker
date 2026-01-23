@@ -1,14 +1,14 @@
 import { NavLink } from "react-router-dom";
 
 const links = [
-  { name: "Dashboard", path: "/dashboard" },
-  { name: "My Applications", path: "/applications" },
-  { name: "Documents", path: "/documents" },
-  { name: "Payments", path: "/payments" },
-  { name: "Universities", path: "/universities" },
-  { name: "Visa Status", path: "/visa" },
-  { name: "Notifications", path: "/notifications" },
-  { name: "Profile", path: "/profile" },
+  { name: "Dashboard", path: "/student/dashboard" },
+  { name: "My Applications", path: "/student/applications" },
+  { name: "Documents", path: "/student/documents" },
+  { name: "Payments", path: "/student/payments" },
+  { name: "Universities", path: "/student/universities" },
+  { name: "Visa Status", path: "/student/visa" },
+  { name: "Notifications", path: "/student/notifications" },
+  { name: "Profile", path: "/student/profile" },
 ];
 
 function Sidebar() {

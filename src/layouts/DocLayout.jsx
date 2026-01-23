@@ -31,6 +31,9 @@ export default function DocLayout() {
           <NavLink to="/docExecutive/course-finder" className="block hover:text-orange-300">
             Course Finder
           </NavLink>
+          <NavLink to="/docExecutive/notification" className="block hover:text-orange-300">
+            Notifications
+          </NavLink>
         </nav>
       </aside>
 

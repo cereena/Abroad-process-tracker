@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export default function Students() {
   const [students, setStudents] = useState([]);
 
+  const navigate = useNavigate()
   useEffect(() => {
     axios
       .get("http://localhost:5000/api/student/all", {
@@ -75,6 +77,14 @@ export default function Students() {
                         Unassigned
                       </span>
                     )}
+                    <button
+                      onClick={() => navigate(`/admin/students/${student._id}`)}
+                      className="px-3 py-1.5 mx-5 text-xs font-bold border border-blue-600 text-blue-600 rounded-md 
+                      hover:bg-blue-600 hover:text-white transition-all duration-200 shadow-sm"
+                    >
+                      View Profile
+                    </button>
+
                   </td>
                 </tr>
               ))

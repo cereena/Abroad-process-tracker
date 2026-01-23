@@ -26,8 +26,9 @@ const Login = () => {
 
       // Student
       if (role === "student") {
-        localStorage.setItem("studentToken", data.token);
-        navigate("/dashboard");
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("role", "student");
+        navigate("/student/profile");
       }
 
       // Admin
@@ -52,7 +53,7 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-orange-100 px-4">
       <div className="bg-white w-full max-w-md p-8 rounded-xl shadow-xl">
         <h2 className="text-3xl font-bold text-center text-blue-900 mb-6">
-          Student Login
+          Login
         </h2>
 
         <form onSubmit={handleLogin} className="space-y-5">

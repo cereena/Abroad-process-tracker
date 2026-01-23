@@ -5,7 +5,7 @@ const RoleRoute = ({ role }) => {
 
   if (role === "admin") token = localStorage.getItem("adminToken");
   if (role === "docExecutive") token = localStorage.getItem("docToken");
-  if (role === "student") token = localStorage.getItem("studentToken");
+  if (role === "student") token = localStorage.getItem("token");
 
   if (!token) {
     return <Navigate to="/login" replace />;

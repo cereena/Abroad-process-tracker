@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function DocStudents() {
   const [students, setStudents] = useState([]);
   const [search, setSearch] = useState("");
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem("docToken");
@@ -126,11 +129,19 @@ export default function DocStudents() {
 
                 <td className="p-3 flex gap-2">
                   <button
-                    className="px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-xs"
-                    onClick={() => handleView(s)}
+                    onClick={() => {
+                      if (!s.profileCompleted) {
+                        alert("Student has not completed profile yet");
+                        return;
+                      }
+                      navigate(`/docExecutive/students/${s._id}`);
+                    }}
+                    className="px-2 py-1 bg-blue-600 text-white rounded text-xs"
                   >
-                    View
+                    View Profile
                   </button>
+
+
                   <select
                     className="border px-2 py-1 text-xs rounded"
                     value={s.status}
@@ -142,6 +153,7 @@ export default function DocStudents() {
                     <option value="Completed">Completed</option>
                   </select>
                 </td>
+
               </tr>
             ))}
           </tbody>

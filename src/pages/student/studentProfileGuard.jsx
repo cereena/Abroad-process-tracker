@@ -5,7 +5,7 @@ export default function StudentProfileGuard() {
   const [loading, setLoading] = useState(true);
   const [profileCompleted, setProfileCompleted] = useState(false);
 
-  const token = localStorage.getItem("studentToken");
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     if (!token) {
@@ -28,9 +28,10 @@ export default function StudentProfileGuard() {
 
   if (loading) return <p>Loading...</p>;
 
-  if (!token) return <Navigate to="/login" />;
+  if (!token) return <Navigate to="/student/login" />;
 
-  if (!profileCompleted) return <Navigate to="/profile" />;
+  // 🔑 FIX HERE
+  if (!profileCompleted) return <Navigate to="/student/profile" />;
 
   return <Outlet />;
 }
