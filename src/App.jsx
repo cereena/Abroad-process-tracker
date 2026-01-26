@@ -49,6 +49,7 @@ import Visa from "./pages/student/Visa.jsx";
 import Notifications from "./pages/student/Notifications.jsx";
 
 
+
 // Route Protection
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import RoleRoute from "./components/RoleRoute.jsx";
@@ -113,7 +114,7 @@ function App() {
           </Route>
         </Route>
 
-
+        {/* Student */}
         <Route path="/student/login" element={<Login />} />
         <Route path="/student" element={<StudentLayout />}>
           <Route element={<ProtectedRoute role="student" />}>
