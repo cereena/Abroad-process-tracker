@@ -73,6 +73,11 @@ const Profile = () => {
     }
   };
 
+  useEffect(() => {
+    setEditMode(true);
+  }, [step]);
+
+
   return (
     <div className="max-w-6xl mx-6 space-y-8 mb-10">
       <h1 className="text-2xl font-bold text-blue-800">My Profile</h1>
@@ -91,7 +96,7 @@ const Profile = () => {
         <Phase2Academics
           profile={profile}
           setProfile={setProfile}
-          editMode={editMode}
+          editMode={true}
         />
       )}
 
@@ -99,20 +104,11 @@ const Profile = () => {
         <Phase3Work
           profile={profile}
           setProfile={setProfile}
-          editMode={editMode}
+          editMode={true}
         />
       )}
 
       <div className="flex justify-center gap-4 pt-6">
-        {!editMode && (
-          <button
-            onClick={() => setEditMode(true)}
-            className="bg-gray-800 text-white px-10 py-2 rounded-lg"
-          >
-            Edit Profile
-          </button>
-        )}
-
         {editMode && (
           <>
             <button
@@ -120,7 +116,7 @@ const Profile = () => {
               disabled={saving}
               className="bg-blue-600 text-white px-10 py-2 rounded-lg"
             >
-              {saving ? "Saving..." : "Save"}
+              {saving ? "Saving..." : step < 3 ? "Save & Continue" : "Save Profile"}
             </button>
 
             <button
@@ -131,7 +127,17 @@ const Profile = () => {
             </button>
           </>
         )}
+
+        {!editMode && step === 1 && (
+          <button
+            onClick={() => setEditMode(true)}
+            className="bg-gray-800 text-white px-10 py-2 rounded-lg"
+          >
+            Edit Profile
+          </button>
+        )}
       </div>
+
     </div>
   );
 };
