@@ -23,17 +23,19 @@ export default function Phase1Personal({ profile, setProfile, editMode }) {
     </div>
   );
 
-  const Field = ({ label, value, onChange, type = "text" }) => (
+  const Field = ({ label, value, onChange, type = "text", required }) => (
     <div>
-      <label className="text-sm text-gray-600">{label}</label>
+      <label className="text-sm text-gray-600">
+        {label} {required && <span className="text-red-500">*</span>}
+      </label>
       <input
         type={type}
         value={value}
         disabled={!editMode}
         onChange={onChange}
-        className={`mt-1 w-full rounded-lg border px-3 py-2 ${
-          editMode ? "bg-white" : "bg-gray-100 text-gray-700"
-        }`}
+        required={required}
+        className={`mt-1 w-full rounded-lg border px-3 py-2 ${!value && required ? "border-red-400" : ""
+          } ${editMode ? "bg-white" : "bg-gray-100"}`}
       />
     </div>
   );
@@ -41,41 +43,42 @@ export default function Phase1Personal({ profile, setProfile, editMode }) {
   return (
     <div className="space-y-8">
       <Card icon={User} title="Personal Information">
-        <Field label="First Name" value={profile.personalInfo.firstName}
-          onChange={e => update("personalInfo","firstName",e.target.value)} />
+        <Field label="First Name" value={profile.personalInfo.firstName} required
+          onChange={e => update("personalInfo", "firstName", e.target.value)}/>
+
         <Field label="Middle Name" value={profile.personalInfo.middleName}
-          onChange={e => update("personalInfo","middleName",e.target.value)} />
+          required onChange={e => update("personalInfo", "middleName", e.target.value)} />
         <Field label="Last Name" value={profile.personalInfo.lastName}
-          onChange={e => update("personalInfo","lastName",e.target.value)} />
+          required onChange={e => update("personalInfo", "lastName", e.target.value)} />
         <Field label="Gender" value={profile.personalInfo.gender}
-          onChange={e => update("personalInfo","gender",e.target.value)} />
+          required onChange={e => update("personalInfo", "gender", e.target.value)} />
         <Field label="Date of Birth" type="date"
           value={toDate(profile.personalInfo.dob)}
-          onChange={e => update("personalInfo","dob",e.target.value)} />
+         required onChange={e => update("personalInfo", "dob", e.target.value)} />
       </Card>
 
       <Card icon={FileText} title="Passport Information">
         <Field label="Name as per Passport" value={profile.passportInfo.nameAsPerPassport}
-          onChange={e => update("passportInfo","nameAsPerPassport",e.target.value)} />
+          required onChange={e => update("passportInfo", "nameAsPerPassport", e.target.value)} />
         <Field label="Passport Number" value={profile.passportInfo.passportNo}
-          onChange={e => update("passportInfo","passportNo",e.target.value)} />
+          required onChange={e => update("passportInfo", "passportNo", e.target.value)} />
         <Field label="Issue Date" type="date"
           value={toDate(profile.passportInfo.issueDate)}
-          onChange={e => update("passportInfo","issueDate",e.target.value)} />
+          required onChange={e => update("passportInfo", "issueDate", e.target.value)} />
         <Field label="Expiry Date" type="date"
           value={toDate(profile.passportInfo.expiryDate)}
-          onChange={e => update("passportInfo","expiryDate",e.target.value)} />
+          required onChange={e => update("passportInfo", "expiryDate", e.target.value)} />
       </Card>
 
       <Card icon={Phone} title="Emergency Contact">
         <Field label="Name" value={profile.emergencyContact.name}
-          onChange={e => update("emergencyContact","name",e.target.value)} />
+         required onChange={e => update("emergencyContact", "name", e.target.value)} />
         <Field label="Relationship" value={profile.emergencyContact.relationship}
-          onChange={e => update("emergencyContact","relationship",e.target.value)} />
+          onChange={e => update("emergencyContact", "relationship", e.target.value)} />
         <Field label="Phone" value={profile.emergencyContact.phone}
-          onChange={e => update("emergencyContact","phone",e.target.value)} />
+         required onChange={e => update("emergencyContact", "phone", e.target.value)} />
         <Field label="Email" value={profile.emergencyContact.email}
-          onChange={e => update("emergencyContact","email",e.target.value)} />
+          onChange={e => update("emergencyContact", "email", e.target.value)} />
       </Card>
     </div>
   );

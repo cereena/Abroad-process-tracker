@@ -1,32 +1,5 @@
 import { toast } from "react-toastify";
 
-const validateProfile = () => {
-  const ai = profile.academicInfo;
-
-  if (!ai.highestQualification) return "Select highest qualification";
-
-  if (ai.tenth && (!ai.tenth.board || !ai.tenth.passoutYear))
-    return "Complete 10th details";
-
-  if (ai.twelfth && (!ai.twelfth.board || !ai.twelfth.passoutYear))
-    return "Complete 12th details";
-
-  if (ai.degree && (!ai.degree.course || !ai.degree.passoutYear))
-    return "Complete degree details";
-
-  if (profile.workExperience?.hasExperience === null)
-    return "Select work experience status";
-
-  return null;
-};
-
-const error = validateProfile();
-if (error) {
-  toast.error(error);
-  return;
-}
-
-
 export default function Phase3Work({ profile, setProfile, editMode }) {
   const hasExp = profile.workExperience?.hasExperience ?? null;
 
@@ -47,7 +20,9 @@ Work experience or gap justification is very important for visa approval.`,
 
   return (
     <div className="bg-white p-6 rounded-xl shadow space-y-4">
-      <h2 className="text-lg font-bold text-blue-800">Work Experience</h2>
+      <h2 className="text-lg font-bold text-blue-800">
+        Work Experience
+      </h2>
 
       <select
         disabled={!editMode}
@@ -58,6 +33,7 @@ Work experience or gap justification is very important for visa approval.`,
             ...p,
             workExperience: { ...p.workExperience, hasExperience: val }
           }));
+
           if (!val) handleNoExperience();
         }}
         className="w-full border rounded-lg px-3 py-2"
@@ -70,9 +46,25 @@ Work experience or gap justification is very important for visa approval.`,
 
       {hasExp && (
         <>
-          <input required disabled={!editMode} placeholder="Company Name" className="input" />
-          <input required disabled={!editMode} placeholder="Role / Designation" className="input" />
-          <input required disabled={!editMode} placeholder="Years of Experience" type="number" className="input" />
+          <input
+            disabled={!editMode}
+            required
+            placeholder="Company Name"
+            className="input"
+          />
+          <input
+            disabled={!editMode}
+            required
+            placeholder="Role / Designation"
+            className="input"
+          />
+          <input
+            disabled={!editMode}
+            required
+            type="number"
+            placeholder="Years of Experience"
+            className="input"
+          />
         </>
       )}
     </div>

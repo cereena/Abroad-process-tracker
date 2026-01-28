@@ -33,9 +33,95 @@ const Profile = () => {
       phone: "",
       email: "",
     },
-    academicInfo: {},
-    workExperience: {},
+    academicInfo: {
+      highestQualification: "",
+      tenth: {},
+      twelfth: {},
+      diploma: {},
+      degree: {},
+      pg: {},
+    },
+    workExperience: {
+      hasExperience: null,
+    },
   });
+
+  const isStepComplete = (stepNo, profile) => {
+    const ai = profile.academicInfo;
+
+    if (stepNo === 1) {
+      const p = profile.personalInfo;
+      return p.firstName && p.lastName && p.gender && p.dob;
+    }
+
+    if (stepNo === 2) {
+      if (!ai.highestQualification) return false;
+
+      if (ai.highestQualification !== "10th") {
+        if (!ai.tenth?.board || !ai.tenth?.passoutYear) return false;
+      }
+
+      if (["12th", "Diploma", "Degree", "PG"].includes(ai.highestQualification)) {
+        if (!ai.twelfth?.board || !ai.twelfth?.passoutYear) return false;
+      }
+
+      if (["Degree", "PG"].includes(ai.highestQualification)) {
+        if (!ai.degree?.course || !ai.degree?.passoutYear) return false;
+      }
+
+      if (ai.highestQualification === "PG") {
+        if (!ai.pg?.course || !ai.pg?.passoutYear) return false;
+      }
+
+      return true;
+    }
+
+
+    return false;
+  };
+
+  const validateStep = (step, profile) => {
+    if (step === 1) {
+      const p = profile.personalInfo;
+      if (!p.firstName || !p.lastName || !p.gender || !p.dob)
+        return "Please complete all personal details";
+    }
+
+    if (step === 2) {
+      const ai = profile.academicInfo;
+
+      if (!ai.highestQualification)
+        return "Select highest qualification";
+
+      if (ai.highestQualification !== "10th") {
+        if (!ai.tenth?.board || !ai.tenth?.passoutYear)
+          return "Complete 10th details";
+      }
+
+      if (["12th", "Diploma", "Degree", "PG"].includes(ai.highestQualification)) {
+        if (!ai.twelfth?.board || !ai.twelfth?.passoutYear)
+          return "Complete 12th details";
+      }
+
+      if (["Degree", "PG"].includes(ai.highestQualification)) {
+        if (!ai.degree?.course || !ai.degree?.passoutYear)
+          return "Complete degree details";
+      }
+
+      if (ai.highestQualification === "PG") {
+        if (!ai.pg?.course || !ai.pg?.passoutYear)
+          return "Complete PG details";
+      }
+    }
+
+    if (step === 3) {
+      if (profile.workExperience?.hasExperience == null)
+        return "Select work experience status";
+    }
+
+    return null;
+  };
+
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -44,13 +130,61 @@ const Profile = () => {
     fetch("http://localhost:5000/api/student/profile", {
       headers: { Authorization: `Bearer ${token}` },
     })
-      .then(res => res.json())
-      .then(data => data && setProfile(p => ({ ...p, ...data })));
+      .then(res => {
+        if (!res.ok) throw new Error("Unauthorized");
+        return res.json();
+      })
+      .then(data => {
+        if (!data) return;
+        setProfile(p => ({
+          ...p,
+          personalInfo: { ...p.personalInfo, ...data.personalInfo },
+          passportInfo: { ...p.passportInfo, ...data.passportInfo },
+          emergencyContact: { ...p.emergencyContact, ...data.emergencyContact },
+          academicInfo: { ...p.academicInfo, ...data.academicInfo },
+          workExperience: { ...p.workExperience, ...data.workExperience },
+        }));
+      })
+      .catch(() => {
+        toast.error("Failed to load profile");
+      });
+
   }, []);
+
+  const validateProfile = (profile) => {
+    const ai = profile.academicInfo;
+
+    if (!ai.highestQualification)
+      return "Select highest qualification";
+
+    if (ai.tenth && (!ai.tenth.board || !ai.tenth.passoutYear))
+      return "Complete 10th details";
+
+    if (ai.twelfth && (!ai.twelfth.board || !ai.twelfth.passoutYear))
+      return "Complete 12th details";
+
+    if (ai.degree && (!ai.degree.course || !ai.degree.passoutYear))
+      return "Complete degree details";
+
+    if (profile.workExperience?.hasExperience === null)
+      return "Select work experience status";
+
+    return null;
+  };
 
   const handleSave = async () => {
     const token = localStorage.getItem("token");
     if (!token) return toast.error("Session expired");
+
+    const error =
+      step < 3
+        ? validateStep(step, profile)
+        : validateProfile(profile);
+
+    if (error) {
+      toast.error(error);
+      return;
+    }
 
     try {
       setSaving(true);
@@ -64,8 +198,13 @@ const Profile = () => {
       });
 
       if (!res.ok) throw new Error();
-      toast.success("Profile saved");
-      setEditMode(false);
+
+      toast.success("Saved successfully");
+
+      if (step < 3) {
+        setStep(step + 1);
+        setEditMode(true);
+      }
     } catch {
       toast.error("Save failed");
     } finally {
@@ -73,17 +212,22 @@ const Profile = () => {
     }
   };
 
-  useEffect(() => {
-    setEditMode(true);
-  }, [step]);
-
-
   return (
     <div className="max-w-6xl mx-6 space-y-8 mb-10">
       <h1 className="text-2xl font-bold text-blue-800">My Profile</h1>
 
-      <ProfileStepper step={step} setStep={setStep} />
+      <ProfileStepper
+        step={step}
+        setStep={(nextStep) => {
+          if (nextStep > step && !isStepComplete(step, profile)) {
+            toast.error("Please complete the current step first");
+            return;
+          }
+          setStep(nextStep);
+          setEditMode(true);
 
+        }}
+      />
       {step === 1 && (
         <Phase1Personal
           profile={profile}
@@ -96,7 +240,7 @@ const Profile = () => {
         <Phase2Academics
           profile={profile}
           setProfile={setProfile}
-          editMode={true}
+          editMode={editMode}
         />
       )}
 
@@ -104,38 +248,70 @@ const Profile = () => {
         <Phase3Work
           profile={profile}
           setProfile={setProfile}
-          editMode={true}
+          editMode={editMode}
         />
       )}
 
-      <div className="flex justify-center gap-4 pt-6">
-        {editMode && (
-          <>
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="bg-blue-600 text-white px-10 py-2 rounded-lg"
-            >
-              {saving ? "Saving..." : step < 3 ? "Save & Continue" : "Save Profile"}
-            </button>
+      <div className="flex justify-between items-center pt-6">
 
-            <button
-              onClick={() => setEditMode(false)}
-              className="bg-gray-300 px-10 py-2 rounded-lg"
-            >
-              Cancel
-            </button>
-          </>
-        )}
+        {/* Previous */}
+        <button
+          disabled={step === 1}
+          onClick={() => setStep(step - 1)}
+          className={`px-8 py-2 rounded-lg ${step === 1
+            ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+            : "bg-gray-300"
+            }`}
+        >
+          Previous
+        </button>
 
-        {!editMode && step === 1 && (
-          <button
-            onClick={() => setEditMode(true)}
-            className="bg-gray-800 text-white px-10 py-2 rounded-lg"
-          >
-            Edit Profile
-          </button>
-        )}
+        {/* Center actions */}
+        <div className="flex gap-4">
+          {editMode && (
+            <>
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="bg-blue-600 text-white px-10 py-2 rounded-lg"
+              >
+                {saving
+                  ? "Saving..."
+                  : step < 3
+                    ? "Save & Next"
+                    : "Save Profile"}
+              </button>
+
+              <button
+                onClick={() => setEditMode(false)}
+                className="bg-gray-300 px-10 py-2 rounded-lg"
+              >
+                Cancel
+              </button>
+            </>
+          )}
+
+          {!editMode && (
+            <button
+              onClick={() => setEditMode(true)}
+              className="bg-gray-800 text-white px-10 py-2 rounded-lg"
+            >
+              Edit
+            </button>
+          )}
+        </div>
+
+        {/* Next */}
+        <button
+          disabled={!isStepComplete(step, profile)}
+          onClick={() => { setStep(step + 1); setEditMode(true);}}
+          className={`px-8 py-2 rounded-lg ${!isStepComplete(step, profile)
+            ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+            : "bg-green-600 text-white"
+            }`}
+        >
+          Next
+        </button>
       </div>
 
     </div>
