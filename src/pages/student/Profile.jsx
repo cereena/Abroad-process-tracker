@@ -4,11 +4,20 @@ import ProfileStepper from "../../components/student/ProfileStepper.jsx";
 import Phase1Personal from "../../components/student/Phase1Personal.jsx";
 import Phase2Academics from "../../components/student/Phase2Academics.jsx";
 import Phase3Work from "../../components/student/Phase3Work.jsx";
+import Phase4Preferences from "../../components/student/Phase4Preferences.jsx";
+import Phase5Sponsorship from "../../components/student/Phase5Sponsorship.jsx";
 
 const Profile = () => {
   const [step, setStep] = useState(1);
   const [editMode, setEditMode] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  const steps = [
+    "Personal",
+    "Academics",
+    "Work Experience",
+    "Preferences"
+  ];
 
   const [profile, setProfile] = useState({
     personalInfo: {
@@ -44,16 +53,42 @@ const Profile = () => {
     workExperience: {
       hasExperience: null,
     },
+    preferences: {
+      countries: [],
+      course: "",
+      intake: "",
+      englishTest: "",
+      score: ""
+    },
+    sponsorship: {
+      type: "",
+
+      loanType: "",
+      bankName: "",
+      loanAmount: "",
+
+      sponsorName: "",
+      relationship: "",
+      sponsorOccupation: "",
+      sponsorCountry: "",
+      isAbroad: null,
+      hasPR: null,
+      filesITR: null,
+      goodTransactions: null,
+    }
+
   });
 
   const isStepComplete = (stepNo, profile) => {
     const ai = profile.academicInfo;
 
+    // STEP 1 — Personal
     if (stepNo === 1) {
       const p = profile.personalInfo;
-      return p.firstName && p.lastName && p.gender && p.dob;
+      return !!(p.firstName && p.lastName && p.gender && p.dob);
     }
 
+    // STEP 2 — Academics
     if (stepNo === 2) {
       if (!ai.highestQualification) return false;
 
@@ -76,9 +111,29 @@ const Profile = () => {
       return true;
     }
 
+    // STEP 3 — Work Experience
+    if (stepNo === 3) {
+      return profile.workExperience?.hasExperience !== null;
+    }
+
+    // STEP 4 — Preferences
+    if (stepNo === 4) {
+      const pref = profile.preferences;
+      if (!pref) return false;
+
+      if (!pref.countries?.length) return false;
+      if (!pref.course) return false;
+      if (!pref.university) return false;
+      if (!pref.englishTest) return false;
+
+      if (pref.englishTest !== "MOI" && !pref.score) return false;
+
+      return true;
+    }
 
     return false;
   };
+
 
   const validateStep = (step, profile) => {
     if (step === 1) {
@@ -119,6 +174,54 @@ const Profile = () => {
         return "Select work experience status";
     }
 
+    if (step === 4) {
+      const pref = profile.preferences;
+
+      if (!pref?.countries?.length)
+        return "Please select at least one country";
+
+      if (!pref.course)
+        return "Please select preferred course";
+
+      if (!pref.university)
+        return "Please enter preferred university";
+
+      if (!pref.englishTest)
+        return "Please select English language proof";
+
+      if (pref.englishTest !== "MOI" && !pref.score)
+        return "Please enter English test score";
+    }
+
+    if (step === 5) {
+      const s = profile.sponsorship || {};
+
+      if (!s.type)
+        return "Select funding type";
+
+      if (s.type === "loan") {
+        if (!s.loanType || !s.bankName)
+          return "Complete loan details";
+      }
+
+      if (s.type === "sponsor") {
+        if (!s.sponsorName || !s.relationship)
+          return "Enter sponsor name and relationship";
+
+        if (s.isAbroad === null || s.isAbroad === undefined)
+          return "Please specify if sponsor is abroad";
+
+        if (s.isAbroad === true && (s.hasPR === null || s.hasPR === undefined))
+          return "Please specify sponsor PR status";
+
+        if (s.filesITR === null || s.filesITR === undefined)
+          return "Please specify ITR filing status";
+
+        if (s.goodTransactions === null || s.goodTransactions === undefined)
+          return "Please specify bank transaction stability";
+      }
+    }
+
     return null;
   };
 
@@ -157,29 +260,66 @@ const Profile = () => {
     if (!ai.highestQualification)
       return "Select highest qualification";
 
-    if (ai.tenth && (!ai.tenth.board || !ai.tenth.passoutYear))
-      return "Complete 10th details";
+    // 10th is required for everything above 10th
+    if (ai.highestQualification !== "10th") {
+      if (!ai.tenth?.board || !ai.tenth?.passoutYear)
+        return "Complete 10th details";
+    }
 
-    if (ai.twelfth && (!ai.twelfth.board || !ai.twelfth.passoutYear))
-      return "Complete 12th details";
+    // 12th required only for these
+    if (["12th", "Diploma", "Degree", "PG"].includes(ai.highestQualification)) {
+      if (!ai.twelfth?.board || !ai.twelfth?.passoutYear)
+        return "Complete 12th details";
+    }
 
-    if (ai.degree && (!ai.degree.course || !ai.degree.passoutYear))
-      return "Complete degree details";
+    // Degree required only for Degree & PG
+    if (["Degree", "PG"].includes(ai.highestQualification)) {
+      if (!ai.degree?.course || !ai.degree?.passoutYear)
+        return "Complete degree details";
+    }
 
+    // PG required only for PG
+    if (ai.highestQualification === "PG") {
+      if (!ai.pg?.course || !ai.pg?.passoutYear)
+        return "Complete PG details";
+    }
+
+    // Phase 3 validation
     if (profile.workExperience?.hasExperience === null)
       return "Select work experience status";
 
+    if (profile.workExperience?.hasExperience === true) {
+      const we = profile.workExperience;
+
+      if (!we.company || !we.role || !we.years) {
+        return "Please complete all work experience details";
+      }
+    }
+
+    // Phase 4 validation — Preferences
+    const pref = profile.preferences;
+
+    if (!pref?.countries?.length)
+      return "Please select at least one preferred country";
+
+    if (!pref.course)
+      return "Please select preferred course";
+
+    if (!pref.englishTest)
+      return "Please select English language proof";
+
+    if (pref.englishTest !== "MOI" && !pref.score)
+      return "Please enter English test score";
+
     return null;
   };
+
 
   const handleSave = async () => {
     const token = localStorage.getItem("token");
     if (!token) return toast.error("Session expired");
 
-    const error =
-      step < 3
-        ? validateStep(step, profile)
-        : validateProfile(profile);
+    const error = validateStep(step, profile);
 
     if (error) {
       toast.error(error);
@@ -201,10 +341,11 @@ const Profile = () => {
 
       toast.success("Saved successfully");
 
-      if (step < 3) {
+      if (step < 4) {
         setStep(step + 1);
         setEditMode(true);
       }
+
     } catch {
       toast.error("Save failed");
     } finally {
@@ -219,14 +360,18 @@ const Profile = () => {
       <ProfileStepper
         step={step}
         setStep={(nextStep) => {
-          if (nextStep > step && !isStepComplete(step, profile)) {
-            toast.error("Please complete the current step first");
-            return;
+          if (nextStep > step) {
+            const error = validateStep(step, profile);
+            if (error) {
+              toast.error(error);
+              return;
+            }
           }
           setStep(nextStep);
           setEditMode(true);
-
         }}
+
+
       />
       {step === 1 && (
         <Phase1Personal
@@ -251,6 +396,23 @@ const Profile = () => {
           editMode={editMode}
         />
       )}
+
+      {step === 4 && (
+        <Phase4Preferences
+          profile={profile}
+          setProfile={setProfile}
+          editMode={editMode}
+        />
+      )}
+
+      {step === 5 && (
+        <Phase5Sponsorship
+          profile={profile}
+          setProfile={setProfile}
+          editMode={editMode}
+        />
+      )}
+
 
       <div className="flex justify-between items-center pt-6">
 
@@ -277,9 +439,7 @@ const Profile = () => {
               >
                 {saving
                   ? "Saving..."
-                  : step < 3
-                    ? "Save & Next"
-                    : "Save Profile"}
+                  : step < 5 ? "Save & Next" : "Save Profile"}
               </button>
 
               <button
@@ -294,8 +454,7 @@ const Profile = () => {
           {!editMode && (
             <button
               onClick={() => setEditMode(true)}
-              className="bg-gray-800 text-white px-10 py-2 rounded-lg"
-            >
+              className="bg-gray-800 text-white px-10 py-2 rounded-lg">
               Edit
             </button>
           )}
@@ -304,7 +463,16 @@ const Profile = () => {
         {/* Next */}
         <button
           disabled={!isStepComplete(step, profile)}
-          onClick={() => { setStep(step + 1); setEditMode(true);}}
+          onClick={() => {
+            const error = validateStep(step, profile);
+            if (error) {
+              toast.error(error);
+              return;
+            }
+            setStep(step + 1);
+            setEditMode(true);
+          }}
+
           className={`px-8 py-2 rounded-lg ${!isStepComplete(step, profile)
             ? "bg-gray-200 text-gray-400 cursor-not-allowed"
             : "bg-green-600 text-white"

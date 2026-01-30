@@ -5,6 +5,8 @@ export default function ProfileStepper({ step, setStep }) {
     { id: 1, label: "Personal" },
     { id: 2, label: "Academics" },
     { id: 3, label: "Work Experience" },
+    { id: 4, label: "Preferences" },
+    { id: 5, label: " Financials" },
   ];
 
   return (
@@ -18,13 +20,13 @@ export default function ProfileStepper({ step, setStep }) {
             {/* Circle */}
             <div
               onClick={() => setStep(s.id)}
-              className={`flex items-center justify-center w-10 h-10 rounded-full cursor-pointer transition
+              className={`flex items-center justify-center w-10 h-10 rounded-full cursor-pointer transition-all duration-200
                 ${
                   isCompleted
                     ? "bg-green-500 text-white"
                     : isActive
                     ? "bg-blue-600 text-white"
-                    : "bg-gray-200 text-gray-500"
+                    : "bg-gray-200 text-gray-500 hover:bg-gray-300"
                 }`}
             >
               {isCompleted ? <Check size={18} /> : s.id}
@@ -33,20 +35,20 @@ export default function ProfileStepper({ step, setStep }) {
             {/* Label */}
             <div className="ml-3">
               <p
-                className={`text-sm font-semibold ${
-                  isActive ? "text-blue-600" : "text-gray-500"
-                }`}
+                className={`text-sm font-semibold transition-colors
+                  ${isActive ? "text-blue-600" : "text-gray-500"}
+                `}
               >
                 {s.label}
               </p>
             </div>
 
-            {/* Line */}
+            {/* Connector line */}
             {index !== steps.length - 1 && (
               <div
-                className={`flex-1 h-[2px] mx-4 ${
-                  step > s.id ? "bg-green-500" : "bg-gray-300"
-                }`}
+                className={`flex-1 h-[2px] mx-4 transition-colors
+                  ${step > s.id ? "bg-green-500" : "bg-gray-300"}
+                `}
               />
             )}
           </div>

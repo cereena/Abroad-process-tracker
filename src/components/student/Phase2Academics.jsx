@@ -63,21 +63,22 @@ export default function Phase2Academics({ profile, setProfile, editMode = true }
             disabled={!editMode}
           />
           <Input
-            label="Specialization / Stream"
+            label="Stream"
             value={profile.academicInfo.tenth?.specialization || ""}
             onChange={e => update("tenth", "specialization", e.target.value)}
             disabled={!editMode}
           />
           <Input
             label="Marks (%)"
+            type="number"
             value={profile.academicInfo.tenth?.marks || ""}
             onChange={e => update("tenth", "marks", e.target.value)}
             disabled={!editMode}
           />
-          <Input
+          <YearSelect
             label="Passout Year"
             value={profile.academicInfo.tenth?.passoutYear || ""}
-            onChange={e => update("tenth", "passoutYear", e.target.value)}
+            onChange={val => update("tenth", "passoutYear", val)}
             disabled={!editMode}
           />
         </AcademicBlock>
@@ -93,22 +94,22 @@ export default function Phase2Academics({ profile, setProfile, editMode = true }
             disabled={!editMode}
           />
           <Input
-            label="Specialization / Stream"
-            placeholder="Science / Commerce / Humanities"
+            label="Stream"
             value={profile.academicInfo.twelfth?.specialization || ""}
             onChange={e => update("twelfth", "specialization", e.target.value)}
             disabled={!editMode}
           />
           <Input
             label="Marks (%)"
+            type="number"
             value={profile.academicInfo.twelfth?.marks || ""}
             onChange={e => update("twelfth", "marks", e.target.value)}
             disabled={!editMode}
           />
-          <Input
+          <YearSelect
             label="Passout Year"
             value={profile.academicInfo.twelfth?.passoutYear || ""}
-            onChange={e => update("twelfth", "passoutYear", e.target.value)}
+            onChange={val => update("twelfth", "passoutYear", val)}
             disabled={!editMode}
           />
         </AcademicBlock>
@@ -129,10 +130,10 @@ export default function Phase2Academics({ profile, setProfile, editMode = true }
             onChange={e => update("diploma", "course", e.target.value)}
             disabled={!editMode}
           />
-          <Input
+          <YearSelect
             label="Passout Year"
             value={profile.academicInfo.diploma?.passoutYear || ""}
-            onChange={e => update("diploma", "passoutYear", e.target.value)}
+            onChange={val => update("diploma", "passoutYear", val)}
             disabled={!editMode}
           />
         </AcademicBlock>
@@ -155,14 +156,15 @@ export default function Phase2Academics({ profile, setProfile, editMode = true }
           />
           <Input
             label="CGPA / Marks"
+            type="number"
             value={profile.academicInfo.degree?.cgpa || ""}
             onChange={e => update("degree", "cgpa", e.target.value)}
             disabled={!editMode}
           />
-          <Input
+          <YearSelect
             label="Passout Year"
             value={profile.academicInfo.degree?.passoutYear || ""}
-            onChange={e => update("degree", "passoutYear", e.target.value)}
+            onChange={val => update("degree", "passoutYear", val)}
             disabled={!editMode}
           />
         </AcademicBlock>
@@ -185,14 +187,15 @@ export default function Phase2Academics({ profile, setProfile, editMode = true }
           />
           <Input
             label="CGPA / Marks"
+            type="number"
             value={profile.academicInfo.pg?.cgpa || ""}
             onChange={e => update("pg", "cgpa", e.target.value)}
             disabled={!editMode}
           />
-          <Input
+          <YearSelect
             label="Passout Year"
             value={profile.academicInfo.pg?.passoutYear || ""}
-            onChange={e => update("pg", "passoutYear", e.target.value)}
+            onChange={val => update("pg", "passoutYear", val)}
             disabled={!editMode}
           />
         </AcademicBlock>
@@ -222,6 +225,31 @@ function Input({ label, ...props }) {
         {...props}
         className="w-full mt-1 border rounded-lg px-3 py-2"
       />
+    </div>
+  );
+}
+
+function YearSelect({ label, value, onChange, disabled }) {
+  const currentYear = new Date().getFullYear();
+  const years = Array.from(
+    { length: currentYear - 2016 + 1 },
+    (_, i) => 2016 + i
+  ).reverse();
+
+  return (
+    <div>
+      <label className="text-sm font-medium">{label}</label>
+      <select
+        disabled={disabled}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        className="w-full mt-1 border rounded-lg px-3 py-2"
+      >
+        <option value="">Select year</option>
+        {years.map(y => (
+          <option key={y} value={y}>{y}</option>
+        ))}
+      </select>
     </div>
   );
 }
