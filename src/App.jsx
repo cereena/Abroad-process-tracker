@@ -56,6 +56,7 @@ import RoleRoute from "./components/RoleRoute.jsx";
 import DocStudentProfile from "./pages/documetation/DocStudentProfile.jsx";
 import StudentProfileGuard from "./pages/student/studentProfileGuard.jsx";
 import DocExecutiveNotifications from "./pages/documetation/DocNotification.jsx";
+import StudentProfilePage from "./pages/student/StudentProfilePage.jsx";
 
 function App() {
   return (
@@ -116,20 +117,31 @@ function App() {
 
         {/* Student */}
         <Route path="/student/login" element={<Login />} />
+
         <Route path="/student" element={<StudentLayout />}>
           <Route element={<ProtectedRoute role="student" />}>
-            <Route path="profile" element={<Profile />} />
+
+            {/* EDIT PROFILE (form) */}
+            <Route path="my-profile" element={<Profile />} />
+
+            {/* GUARD */}
             <Route element={<StudentProfileGuard />}>
-              <Route path="/student/dashboard" element={<Dashboard />} />
+
+              <Route path="dashboard" element={<Dashboard />} />
               <Route path="applications" element={<StudentApplications />} />
               <Route path="documents" element={<Documents />} />
               <Route path="payments" element={<Payments />} />
               <Route path="universities" element={<Universities />} />
               <Route path="visa" element={<Visa />} />
               <Route path="notifications" element={<Notifications />} />
+
+              {/* VIEW PROFILE */}
+              <Route path="profile" element={<StudentProfilePage />} />
+
             </Route>
           </Route>
         </Route>
+
 
 
 

@@ -2,13 +2,18 @@ import { NavLink } from "react-router-dom";
 
 const links = [
   { name: "Dashboard", path: "/student/dashboard" },
+
+  // view profile
+  { name: "My Profile", path: "/student/profile" },
+  // fill profile
+  { name: "Study Abroad Apply", path: "/student/my-profile" },
   { name: "My Applications", path: "/student/applications" },
   { name: "Documents", path: "/student/documents" },
   { name: "Payments", path: "/student/payments" },
   { name: "Universities", path: "/student/universities" },
   { name: "Visa Status", path: "/student/visa" },
   { name: "Notifications", path: "/student/notifications" },
-  { name: "Profile", path: "/student/profile" },
+
 ];
 
 function Sidebar() {
@@ -22,8 +27,7 @@ function Sidebar() {
             key={link.path}
             to={link.path}
             className={({ isActive }) =>
-              `px-4 py-2 rounded-lg transition ${
-                isActive ? "bg-blue-700" : "hover:bg-blue-800"
+              `px-4 py-2 rounded-lg transition ${isActive ? "bg-blue-700" : "hover:bg-blue-800"
               }`
             }
           >

@@ -31,7 +31,7 @@ export default function StudentProfileGuard() {
   if (!token) return <Navigate to="/student/login" />;
 
   // 🔑 FIX HERE
-  if (!profileCompleted) return <Navigate to="/student/profile" />;
+  if (!profileCompleted) return <Navigate to="/student/my-profile" />;
 
   return <Outlet />;
 }

@@ -5,12 +5,14 @@ const API = axios.create({
 });
 
 API.interceptors.request.use((req) => {
-  const token = localStorage.getItem("studentToken");
+  const token = localStorage.getItem("token");
   if (token) {
-    req.headers.Authorization = `Bearer ${token}`;
+    req.headers.authorization = `Bearer ${token}`;
   }
   return req;
 });
+
+export default API; 
 
 export const getProfilePhase2 = () =>
   API.get("/student/profile/phase2");

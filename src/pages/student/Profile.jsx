@@ -7,16 +7,19 @@ import Phase3Work from "../../components/student/Phase3Work.jsx";
 import Phase4Preferences from "../../components/student/Phase4Preferences.jsx";
 import Phase5Sponsorship from "../../components/student/Phase5Sponsorship.jsx";
 
+
 const Profile = () => {
   const [step, setStep] = useState(1);
   const [editMode, setEditMode] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [serverProfile, setServerProfile] = useState(null);
 
   const steps = [
     "Personal",
     "Academics",
     "Work Experience",
-    "Preferences"
+    "Preferences",
+    "Sponsorship",
   ];
 
   const [profile, setProfile] = useState({
@@ -42,6 +45,12 @@ const Profile = () => {
       phone: "",
       email: "",
     },
+    backgroundInfo: {
+      criminalOffence: false,
+      immigrationApplied: false,
+      medicalCondition: false,
+      visaRefusal: false,
+    },
     academicInfo: {
       highestQualification: "",
       tenth: {},
@@ -49,7 +58,12 @@ const Profile = () => {
       diploma: {},
       degree: {},
       pg: {},
-    },
+      educationGap: {
+        hasGap: null,
+        reason: "",
+      },
+    }
+    ,
     workExperience: {
       hasExperience: null,
     },
@@ -57,8 +71,9 @@ const Profile = () => {
       countries: [],
       course: "",
       intake: "",
+      university: "",
       englishTest: "",
-      score: ""
+      score: "",
     },
     sponsorship: {
       type: "",
@@ -80,7 +95,9 @@ const Profile = () => {
   });
 
   const isStepComplete = (stepNo, profile) => {
+    if (!profile) return false;
     const ai = profile.academicInfo;
+    if (!ai) return false;
 
     // STEP 1 — Personal
     if (stepNo === 1) {
@@ -130,6 +147,30 @@ const Profile = () => {
 
       return true;
     }
+
+    // STEP 5 — Sponsorship
+    if (stepNo === 5) {
+      const s = profile.sponsorship;
+      if (!s?.type) return false;
+
+      if (s.type === "loan") {
+        return !!(s.loanType && s.bankName);
+      }
+
+      if (s.type === "sponsor") {
+        return !!(
+          s.sponsorName &&
+          s.relationship &&
+          s.isAbroad !== null &&
+          s.filesITR !== null &&
+          s.goodTransactions !== null &&
+          (s.isAbroad === false || s.hasPR !== null)
+        );
+      }
+
+      return false;
+    }
+
 
     return false;
   };
@@ -225,6 +266,9 @@ const Profile = () => {
     return null;
   };
 
+  const token = localStorage.getItem("token");
+  console.log("Token from localStorage:", token);
+
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -238,16 +282,19 @@ const Profile = () => {
         return res.json();
       })
       .then(data => {
-        if (!data) return;
-        setProfile(p => ({
-          ...p,
-          personalInfo: { ...p.personalInfo, ...data.personalInfo },
-          passportInfo: { ...p.passportInfo, ...data.passportInfo },
-          emergencyContact: { ...p.emergencyContact, ...data.emergencyContact },
-          academicInfo: { ...p.academicInfo, ...data.academicInfo },
-          workExperience: { ...p.workExperience, ...data.workExperience },
-        }));
+        const normalizedProfile = {
+          ...profile,         
+          ...data,           
+          academicInfo: data.academicInfo || profile.academicInfo,
+          workExperience: data.workExperience || profile.workExperience,
+          preferences: data.preferences || profile.preferences,
+          sponsorship: data.sponsorship || profile.sponsorship,
+        };
+
+        setServerProfile(data);
+        setProfile(normalizedProfile);
       })
+
       .catch(() => {
         toast.error("Failed to load profile");
       });
@@ -340,6 +387,7 @@ const Profile = () => {
       if (!res.ok) throw new Error();
 
       toast.success("Saved successfully");
+      setServerProfile(JSON.parse(JSON.stringify(profile)));
 
       if (step < 4) {
         setStep(step + 1);
@@ -355,7 +403,7 @@ const Profile = () => {
 
   return (
     <div className="max-w-6xl mx-6 space-y-8 mb-10">
-      <h1 className="text-2xl font-bold text-blue-800">My Profile</h1>
+      <h1 className="text-2xl font-bold text-blue-800 mt-3">Apply for Study Abroad</h1>
 
       <ProfileStepper
         step={step}
@@ -382,11 +430,15 @@ const Profile = () => {
       )}
 
       {step === 2 && (
-        <Phase2Academics
-          profile={profile}
-          setProfile={setProfile}
-          editMode={editMode}
-        />
+        editMode ? (
+          <Phase2Academics
+            profile={profile}
+            setProfile={setProfile}
+            editMode
+          />
+        ) : (
+          <AcademicSummary academicInfo={profile.academicInfo} />
+        )
       )}
 
       {step === 3 && (
@@ -443,20 +495,29 @@ const Profile = () => {
               </button>
 
               <button
-                onClick={() => setEditMode(false)}
+                onClick={() => {
+                  setProfile(JSON.parse(JSON.stringify(serverProfile)));
+                  setEditMode(false);
+                }}
                 className="bg-gray-300 px-10 py-2 rounded-lg"
               >
                 Cancel
               </button>
+
             </>
           )}
 
           {!editMode && (
             <button
-              onClick={() => setEditMode(true)}
-              className="bg-gray-800 text-white px-10 py-2 rounded-lg">
+              onClick={() => {
+                setProfile(JSON.parse(JSON.stringify(serverProfile)));
+                setEditMode(true);
+              }}
+              className="bg-blue-800 text-white px-10 py-2 rounded-lg"
+            >
               Edit
             </button>
+
           )}
         </div>
 

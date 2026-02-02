@@ -91,7 +91,7 @@ export default function Phase4Preferences({ profile, setProfile, editMode = true
                 >
                     <option value="">Select</option>
                     <option value="Jan">January</option>
-                    <option value="Sep">March</option>
+                    <option value="Mar">March</option>
                     <option value="May">May</option>
                     <option value="Sep">September</option>
                     <option value="Undecided">Undecided</option>

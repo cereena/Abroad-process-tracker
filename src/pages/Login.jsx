@@ -28,7 +28,7 @@ const Login = () => {
       if (role === "student") {
         localStorage.setItem("token", data.token);
         localStorage.setItem("role", "student");
-        navigate("/student/profile");
+        navigate("/student/my-profile");
       }
 
       // Admin
