@@ -7,6 +7,8 @@ import {
   UploadCloud,
   Eye,
 } from "lucide-react";
+import { toast } from "react-toastify";
+
 
 /* AFTER DOCS */
 const afterDocs = [
@@ -181,18 +183,22 @@ function Documents() {
     useEffect(() => {
       const doc = docsMap[name];
 
-      if (doc) {
-        const map = {
-          pending: "Under Review",
-          verified: "Verified",
-          rejected: "Rejected",
-        };
-
-        setStatus(map[doc.status] || "Under Review");
-        setComment(doc.rejectionReason || "");
-        setUploaded(true);
+      if (!doc) {
+        setStatus("Pending");
+        return;
       }
+
+      const map = {
+        Pending: "Under Review",
+        verified: "Verified",
+        rejected: "Rejected",
+      };
+
+      setStatus(map[doc.status] || "Under Review");
+      setComment(doc.rejectionReason || "");
+      setUploaded(true);
     }, [docsMap, name]);
+
 
     const validateFile = (file) => {
       const max = 5 * 1024 * 1024;
@@ -222,7 +228,7 @@ function Documents() {
     /* STATUS UI */
     const getStatusUI = () => {
       const config = {
-        Pending: {
+        pending: {
           color: "text-slate-500 bg-slate-100",
           icon: <Clock size={12} />,
         },
@@ -240,7 +246,7 @@ function Documents() {
         },
       };
 
-      const { color, icon } = config[status] || config.Pending;
+      const { color, icon } = config[status] || config.pending;
 
       return (
         <div
@@ -254,14 +260,13 @@ function Documents() {
 
     return (
       <div
-        className={`group transition-all duration-200 bg-white border rounded-xl overflow-hidden hover:shadow-md ${
-          locked
-            ? "opacity-40 grayscale pointer-events-none"
-            : "border-slate-200"
-        }`}
+        className={`group transition-all duration-200 bg-white border rounded-xl overflow-hidden hover:shadow-md ${locked
+          ? "opacity-40 grayscale pointer-events-none"
+          : "border-slate-200"
+          }`}
       >
         {/* HEADER */}
-        <div className="flex items-center justify-between px-5 py-3 border-b border-slate-50 bg-slate-50/50">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-slate-50 bg-blue-400/50">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
               <FileText size={18} />
@@ -302,9 +307,7 @@ function Documents() {
                 </a>
               ) : (
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                  {selectedFile ? "Ready to upload" : "Awaiting selection"}
-                </p>
-              )}
+                  {uploaded ? "Uploaded" : selectedFile ? "Ready to upload" : "Awaiting selection"}</p>)}
 
               {selectedFile && (
                 <div className="flex items-center gap-2 p-2 rounded-lg bg-blue-50/50 border border-blue-100 max-w-xs">
@@ -324,7 +327,7 @@ function Documents() {
             {status !== "Verified" && (
               <label className="flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold transition-all bg-white border-2 border-slate-200 rounded-lg cursor-pointer hover:border-blue-600 hover:text-blue-600 text-slate-600 active:scale-95">
                 <UploadCloud size={14} />
-                <span>{selectedFile ? "Change" : "Browse"}</span>
+                <span>{uploaded || selectedFile ? "Change" : "Browse"}</span>
 
                 <input
                   type="file"
@@ -365,7 +368,16 @@ function Documents() {
           ? "before"
           : "after";
 
-        await uploadFile(file, name, type);
+        const newDoc = await uploadFile(file, name, type);
+
+        setBeforeUploadedDocs((prev) =>
+          type === "before" ? [...prev, newDoc] : prev
+        );
+
+        setAfterUploadedDocs((prev) =>
+          type === "after" ? [...prev, newDoc] : prev
+        );
+
       }
 
       const res = await fetch(
@@ -379,15 +391,20 @@ function Documents() {
 
       const data = await res.json();
 
+      if (!Array.isArray(data)) {
+        console.error("Invalid docs response:", data);
+        return;
+      }
+
       setBeforeUploadedDocs(data.filter((d) => d.type === "before"));
       setAfterUploadedDocs(data.filter((d) => d.type === "after"));
 
-      alert("Documents uploaded");
+      toast.success("Documents uploaded. Under review ⏳");
 
       setSelectedFiles({});
     } catch (err) {
       console.error(err);
-      alert("Upload failed");
+      toast.error("Upload failed");
     } finally {
       setSaving(false);
     }
