@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export default function DocExecutiveNotifications() {
   const [notifications, setNotifications] = useState([]);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -40,6 +42,25 @@ export default function DocExecutiveNotifications() {
     return <p className="text-red-500">{error}</p>;
   }
 
+  const markAsRead = async (id) => {
+    const token = localStorage.getItem("docToken");
+
+    await fetch(`http://localhost:5000/api/notifications/${id}/read`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    // Update UI instantly
+    setNotifications((prev) =>
+      prev.map((n) =>
+        n._id === id ? { ...n, isRead: true } : n
+      )
+    );
+  };
+
+
   return (
     <div className="space-y-4">
       {notifications.length === 0 && (
@@ -52,17 +73,18 @@ export default function DocExecutiveNotifications() {
         return (
           <div
             key={note._id}
-            className="bg-white p-4 rounded-lg shadow border-l-4 border-blue-600"
+            className={`bg-white p-4 rounded-lg shadow border-l-4 
+        ${note.isRead ? "border-gray-400" : "border-blue-600"}`}
           >
             <h4 className="font-bold text-lg">{note.title}</h4>
             <p className="text-gray-700">{note.message}</p>
 
-            {/* 🔑 STUDENT DETAILS */}
+
+            {/* Student info */}
             {student._id && (
               <div className="mt-2 text-sm text-gray-600 space-y-1">
                 <p>
-                  <strong>Student:</strong>{" "}
-                  {student.name || "N/A"}
+                  <strong>Student:</strong> {student.name || "N/A"}
                 </p>
 
                 {student.studentEnquiryCode && (
@@ -80,12 +102,29 @@ export default function DocExecutiveNotifications() {
               </div>
             )}
 
+
+            {/* View button for document uploads */}
+            {note.type === "document_upload" && (
+              <button
+                className="mt-3 bg-blue-600 text-white px-3 py-1 rounded"
+                onClick={() => {
+                  markAsRead(note._id);
+                  navigate(`/doc/documents?student=${student._id}`);
+                }}
+              >
+                View Documents
+              </button>
+
+            )}
+
+
             <small className="text-gray-400 block mt-3">
               {new Date(note.createdAt).toLocaleString()}
             </small>
           </div>
         );
       })}
+
     </div>
   );
 }

@@ -21,7 +21,7 @@ function Topbar() {
 
         <button
           onClick={handleLogout}
-          className="bg-red-500 text-white px-4 py-1 rounded-lg text-sm"
+          className="px-4 py-1.5 text-sm font-semibold text-red-600 border border-red-200 rounded-md hover:bg-red-50 transition-colors"
         >
           Logout
         </button>
