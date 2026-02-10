@@ -2,37 +2,79 @@ import React from "react";
 
 function Home() {
   return (
-    <div className="bg-orange-100 overflow-x-hidden">
+    <div className="bg-[#fff3d8] overflow-x-hidden">
       {/* Hero Section */}
-      <section className="relative flex items-center justify-end text-right h-[100vh] overflow-hidden">
-        {/* BACKGROUND VIDEO */}
+      <section className="relative min-h-screen overflow-hidden">
+
+        {/* ================= DESKTOP VIDEO ================= */}
         <video
           autoPlay
           loop
           muted
           playsInline
-          // 'object-cover' forces the video to cover the area without distorting aspect ratio, 
-          // reducing the "zoomed in" effect compared to min-w/min-h-full
-          className="absolute z-0 w-full h-full object-cover"
+          className="hidden md:block absolute inset-0 z-0 w-full h-full object-cover"
         >
-          <source src="/main_video.mp4" type="video/mp4" />
-          Your browser does not support the video tag.
+          <source src="/video3.mp4" type="video/mp4" />
         </video>
 
-        {/* CONTENT - Wrapped in a div to ensure it stays on top of the video */}
-        <div className="relative z-10 flex flex-col items-center max-w-lg mr-16 p-8 rounded-xl bg-white/70 backdrop-blur-sm">
-          <h2 className="text-4xl font-bold text-blue-800 mb-6 text-center">
+
+        {/* ================= MOBILE VIEW ================= */}
+        <div className="md:hidden bg-[#fff3d7] flex flex-col items-center text-center px-6 pt-20 pb-10">
+
+          <h2 className="text-3xl font-bold text-blue-800 mb-4">
             Start Your Global Education Journey
           </h2>
-          <p className="text-lg text-gray-700 mb-6 text-center">
+
+          <p className="text-gray-700 mb-6">
             Find the right country that fits your dreams and budget.
             Get expert guidance at every step of your abroad study journey.
           </p>
-          <button className="bg-blue-800 text-white px-6 py-3 rounded-lg shadow hover:bg-blue-700">
+
+          <button className="bg-blue-800 text-white px-6 py-3 rounded-lg shadow hover:bg-blue-700 mb-6">
             Get Started
           </button>
+
+          {/* MOBILE VIDEO */}
+          <div className="w-full max-w-md">
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full"
+            >
+              <source src="/mobile.mp4" type="video/mp4" />
+            </video>
+          </div>
+
         </div>
+
+
+        {/* ================= DESKTOP CONTENT ================= */}
+        <div className="hidden md:flex relative z-10 h-screen items-center justify-end text-right">
+
+          <div className="flex flex-col items-center max-w-lg mr-16 p-8 mb-20 rounded-xl">
+
+            <h2 className="text-4xl font-bold text-blue-800 mb-6 text-center">
+              Start Your Global Education Journey
+            </h2>
+
+            <p className="text-lg text-gray-700 mb-6 text-center">
+              Find the right country that fits your dreams and budget.
+              Get expert guidance at every step of your abroad study journey.
+            </p>
+
+            <button className="bg-blue-800 text-white px-6 py-3 rounded-lg shadow hover:bg-blue-700">
+              Get Started
+            </button>
+
+          </div>
+
+        </div>
+
       </section>
+
+
 
       {/* Why Choose Us */}
       <section className="max-w-6xl mx-auto py-16 px-6 text-center">
