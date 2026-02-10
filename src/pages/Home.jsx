@@ -4,11 +4,23 @@ function Home() {
   return (
     <div className="bg-orange-100 overflow-x-hidden">
       {/* Hero Section */}
-      <section
-        className="flex items-center justify-end text-right h-[85vh] bg-cover bg-center"
-        style={{ backgroundImage: "url('/main.png')" }}
-      >
-        <div className="flex flex-col items-center max-w-lg mr-16 bg-transparent p-8 rounded-xl">
+      <section className="relative flex items-center justify-end text-right h-[100vh] overflow-hidden">
+        {/* BACKGROUND VIDEO */}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          // 'object-cover' forces the video to cover the area without distorting aspect ratio, 
+          // reducing the "zoomed in" effect compared to min-w/min-h-full
+          className="absolute z-0 w-full h-full object-cover"
+        >
+          <source src="/main_video.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+
+        {/* CONTENT - Wrapped in a div to ensure it stays on top of the video */}
+        <div className="relative z-10 flex flex-col items-center max-w-lg mr-16 p-8 rounded-xl bg-white/70 backdrop-blur-sm">
           <h2 className="text-4xl font-bold text-blue-800 mb-6 text-center">
             Start Your Global Education Journey
           </h2>
@@ -21,7 +33,6 @@ function Home() {
           </button>
         </div>
       </section>
-
 
       {/* Why Choose Us */}
       <section className="max-w-6xl mx-auto py-16 px-6 text-center">

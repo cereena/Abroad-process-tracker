@@ -57,6 +57,7 @@ import DocStudentProfile from "./pages/documetation/DocStudentProfile.jsx";
 import StudentProfileGuard from "./pages/student/studentProfileGuard.jsx";
 import DocExecutiveNotifications from "./pages/documetation/DocNotification.jsx";
 import StudentProfilePage from "./pages/student/StudentProfilePage.jsx";
+import DocDocuments from "./pages/documetation/DocDocuments.jsx";
 
 function App() {
   return (
@@ -102,18 +103,20 @@ function App() {
         </Route>
 
         {/* ================= DOCUMENTATION EXECUTIVE ================= */}
-        <Route element={<RoleRoute role="docExecutive" />}>
+        <Route element={<RoleRoute role="DocExecutive" />}>
           <Route path="/docExecutive" element={<DocLayout />}>
             <Route index element={<DocDashboard />} />
             <Route path="dashboard" element={<DocDashboard />} />
             <Route path="students" element={<DocStudents />} />
+            <Route path="students/:id" element={<DocStudentProfile />} />   
             <Route path="applications" element={<DocApplications />} />
             <Route path="commission" element={<DocsCommission />} />
             <Route path="course-finder" element={<CourseFinder />} />
-            <Route path="/docExecutive/students/:id" element={<DocStudentProfile />} />
+            <Route path="documents" element={<DocDocuments />} />         
             <Route path="notification" element={<DocExecutiveNotifications />} />
           </Route>
         </Route>
+
 
         {/* Student */}
         <Route path="/student/login" element={<Login />} />

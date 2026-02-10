@@ -69,6 +69,7 @@ export default function DocExecutiveNotifications() {
 
       {notifications.map((note) => {
         const student = note.studentId || {};
+        console.log("NOTE OBJECT:", note);
 
         return (
           <div
@@ -104,17 +105,24 @@ export default function DocExecutiveNotifications() {
 
 
             {/* View button for document uploads */}
-            {note.type === "document_upload" && (
+            {note.title === "New Document Uploaded" && (
               <button
                 className="mt-3 bg-blue-600 text-white px-3 py-1 rounded"
                 onClick={() => {
+                  const sid = note.studentId?._id;
+
+                  if (!sid) {
+                    alert("Student ID missing!");
+                    return;
+                  }
+
                   markAsRead(note._id);
-                  navigate(`/doc/documents?student=${student._id}`);
+
+                  navigate(`/docExecutive/documents?student=${sid}`);
                 }}
               >
                 View Documents
               </button>
-
             )}
 
 
