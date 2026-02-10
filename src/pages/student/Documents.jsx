@@ -46,7 +46,11 @@ const uploadFile = async (file, name, type) => {
     body: formData,
   });
 
-  if (!res.ok) throw new Error("Upload failed");
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.message || "Upload failed");
+  }
+
 
   const data = await res.json();
   return data.document;
@@ -189,10 +193,11 @@ function Documents() {
       }
 
       const map = {
-        Pending: "Under Review",
+        pending: "Under Review",
         verified: "Verified",
         rejected: "Rejected",
       };
+
 
       setStatus(map[doc.status] || "Under Review");
       setComment(doc.rejectionReason || "");
