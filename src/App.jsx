@@ -103,7 +103,7 @@ function App() {
         </Route>
 
         {/* ================= DOCUMENTATION EXECUTIVE ================= */}
-        <Route element={<RoleRoute role="DocExecutive" />}>
+        <Route element={<RoleRoute role="docexecutive" />}>
           <Route path="/docExecutive" element={<DocLayout />}>
             <Route index element={<DocDashboard />} />
             <Route path="dashboard" element={<DocDashboard />} />

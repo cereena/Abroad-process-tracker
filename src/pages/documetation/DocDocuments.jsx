@@ -245,12 +245,12 @@ export default function DocDocuments() {
         {/* PDF */}
         {previewUrl && previewType === "pdf" && (
           <iframe
-            src={previewUrl.replace("/upload/", "/upload/fl_inline/")}
-            title="PDF Preview"
+            src={previewUrl}
             className="w-full h-[400px] border"
+            title="PDF Preview"
           />
-
         )}
+
       </div>
     </div>
   );
