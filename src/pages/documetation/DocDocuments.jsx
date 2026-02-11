@@ -83,13 +83,15 @@ export default function DocDocuments() {
     setPreviewUrl(cleanUrl);
 
     // Detect file type
-    if (cleanUrl.toLowerCase().endsWith(".pdf")) {
+    if (
+      cleanUrl.toLowerCase().includes(".pdf") ||
+      cleanUrl.includes("/raw/")
+    ) {
       setPreviewType("pdf");
     } else {
       setPreviewType("image");
     }
   };
-
   /* ================= FILTER ================= */
 
   const filteredDocs = documents.filter((doc) => {
@@ -243,17 +245,11 @@ export default function DocDocuments() {
         {/* PDF */}
         {previewUrl && previewType === "pdf" && (
           <iframe
-            src={previewUrl}
+            src={previewUrl.replace("/upload/", "/upload/fl_inline/")}
             title="PDF Preview"
             className="w-full h-[400px] border"
           />
-        )}
 
-        {/* URL */}
-        {previewUrl && (
-          <p className="text-xs text-green-600 mt-2 break-all">
-            {previewUrl}
-          </p>
         )}
       </div>
     </div>

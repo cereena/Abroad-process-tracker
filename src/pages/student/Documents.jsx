@@ -30,6 +30,7 @@ const afterDocs = [
 
 /* UPLOAD API */
 const uploadFile = async (file, name, type) => {
+
   const formData = new FormData();
 
   formData.append("file", file);
@@ -46,14 +47,14 @@ const uploadFile = async (file, name, type) => {
     body: formData,
   });
 
+  const text = await res.text();
+
   if (!res.ok) {
-    const err = await res.json();
-    throw new Error(err.message || "Upload failed");
+    console.error("Upload error:", text);
+    throw new Error(text);
   }
 
-
-  const data = await res.json();
-  return data.document;
+  return JSON.parse(text).document;
 };
 
 function Documents() {
@@ -97,9 +98,9 @@ function Documents() {
     if (!profile) return [];
 
     const docs = [
-      "Passport",
-      "Secondary School Certificate",
-      "Higher Secondary Certificate",
+      { name: "Passport", type: "before" },
+      { name: "Secondary School Certificate", type: "before" },
+      { name: "Higher Secondary Certificate", type: "before" },
     ];
 
     const qualification =
@@ -112,26 +113,30 @@ function Documents() {
       qualification.includes("master")
     ) {
       docs.push(
-        "Main Degree Certificate",
-        "Provisional Certificate",
-        "Consolidated Marklist"
+        { name: "Main Degree Certificate", type: "before" },
+        { name: "Provisional Certificate", type: "before" },
+        { name: "Consolidated Marklist", type: "before" }
       );
     }
 
     docs.push(
-      "LOR (Letter of Recommendation)",
-      "Medium Of Instruction (MOI)",
-      "English Proficiency Test : IELTS / PTE / TOFEL",
-      "Updated Resume/CV",
-      "Statement of Purpose (SOP)"
+      { name: "LOR (Letter of Recommendation)", type: "before" },
+      { name: "Medium Of Instruction (MOI)", type: "before" },
+      { name: "English Proficiency Test : IELTS / PTE / TOFEL", type: "before" },
+      { name: "Updated Resume/CV", type: "after" },
+      { name: "Statement of Purpose (SOP)", type: "after" }
     );
 
     if (profile.workExperience?.hasExperience) {
-      docs.push("Work Experience Certificate");
+      docs.push({
+        name: "Work Experience Certificate",
+        type: "after",
+      });
     }
 
     return docs;
   }, [profile]);
+
 
   /* FETCH DOCUMENTS */
   useEffect(() => {
@@ -197,7 +202,6 @@ function Documents() {
         verified: "Verified",
         rejected: "Rejected",
       };
-
 
       setStatus(map[doc.status] || "Under Review");
       setComment(doc.rejectionReason || "");
@@ -364,49 +368,34 @@ function Documents() {
     try {
       setSaving(true);
 
-      const token = localStorage.getItem("token");
+      const allDocs = [...beforeDocs];
 
       for (const [name, file] of Object.entries(selectedFiles)) {
         if (!file) continue;
 
-        const type = beforeDocs.includes(name)
-          ? "before"
-          : "after";
+        const docObj = allDocs.find((d) => d.name === name);
 
-        const newDoc = await uploadFile(file, name, type);
-
-        setBeforeUploadedDocs((prev) =>
-          type === "before" ? [...prev, newDoc] : prev
-        );
-
-        setAfterUploadedDocs((prev) =>
-          type === "after" ? [...prev, newDoc] : prev
-        );
-
-      }
-
-      const res = await fetch(
-        "http://localhost:5000/api/documents/my",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        if (!docObj) {
+          console.error("Doc not found:", name);
+          continue;
         }
-      );
 
-      const data = await res.json();
+        const newDoc = await uploadFile(
+          file,
+          docObj.name,
+          docObj.type
+        );
 
-      if (!Array.isArray(data)) {
-        console.error("Invalid docs response:", data);
-        return;
+        if (docObj.type === "before") {
+          setBeforeUploadedDocs((prev) => [...prev, newDoc]);
+        } else {
+          setAfterUploadedDocs((prev) => [...prev, newDoc]);
+        }
       }
-
-      setBeforeUploadedDocs(data.filter((d) => d.type === "before"));
-      setAfterUploadedDocs(data.filter((d) => d.type === "after"));
 
       toast.success("Documents uploaded. Under review ⏳");
-
       setSelectedFiles({});
+
     } catch (err) {
       console.error(err);
       toast.error("Upload failed");
@@ -414,6 +403,7 @@ function Documents() {
       setSaving(false);
     }
   };
+
 
   /* LOADING */
   if (!profile || beforeDocs.length === 0) {
@@ -438,7 +428,11 @@ function Documents() {
         </h2>
 
         {beforeDocs.map((doc) => (
-          <DocCard key={doc} name={doc} type="before" />
+          <DocCard
+            key={doc.name}
+            name={doc.name}
+            type={doc.type}
+          />
         ))}
 
         <button
