@@ -59,6 +59,7 @@ import DocExecutiveNotifications from "./pages/documetation/DocNotification.jsx"
 import StudentProfilePage from "./pages/student/StudentProfilePage.jsx";
 import DocDocuments from "./pages/documetation/DocDocuments.jsx";
 import AdminUniversities from "./pages/admin/Universities-admin.jsx";
+import UniversityForm from "./pages/admin/UniversityForm.jsx";
 
 function App() {
   return (
@@ -95,7 +96,9 @@ function App() {
             <Route path="docs-team" element={<DocsTeam />} />
             <Route path="docs-team/add" element={<AddExecutive />} />
             <Route path="applications" element={<Applications />} />
-            <Route path="universities" element={<AdminUniversities />}/>
+            <Route path="universities" element={<AdminUniversities />} />
+            <Route path="universities/new" element={<UniversityForm />} />
+            <Route path="universities/edit/:id" element={<UniversityForm />} />
             <Route path="reports" element={<Reports />} />
             <Route path="notifications" element={<AdminNotifications />} />
             <Route path="leads" element={<AdminLeads />} />
@@ -109,11 +112,11 @@ function App() {
             <Route index element={<DocDashboard />} />
             <Route path="dashboard" element={<DocDashboard />} />
             <Route path="students" element={<DocStudents />} />
-            <Route path="students/:id" element={<DocStudentProfile />} />   
+            <Route path="students/:id" element={<DocStudentProfile />} />
             <Route path="applications" element={<DocApplications />} />
             <Route path="commission" element={<DocsCommission />} />
             <Route path="course-finder" element={<CourseFinder />} />
-            <Route path="documents" element={<DocDocuments />} />         
+            <Route path="documents" element={<DocDocuments />} />
             <Route path="notification" element={<DocExecutiveNotifications />} />
           </Route>
         </Route>

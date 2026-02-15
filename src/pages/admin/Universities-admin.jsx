@@ -1,8 +1,49 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import {
+  Edit,
+  Trash2,
+  PlusCircle,
+  Globe,
+  GraduationCap,
+  DollarSign,
+  Award,
+  BookOpen,
+  Percent,
+  Clock,
+  Download,
+} from "lucide-react";
+
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 const AdminUniversities = () => {
+  const navigate = useNavigate();
+
   const [universities, setUniversities] = useState([]);
+  const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  /* FILTER STATE */
+
+  const [search, setSearch] = useState("");
+
+  const [filters, setFilters] = useState({
+    country: "",
+    maxBudget: "",
+    minPercentage: "",
+    stream: "",
+    intake: "",
+    schengen: "",
+    prChance: "",
+    stayBack: "",
+  });
+
+  /* PAGINATION */
+
+  const [page, setPage] = useState(1);
+  const perPage = 9;
 
   /* ================= FETCH ================= */
 
@@ -23,120 +64,395 @@ const AdminUniversities = () => {
         }
       );
 
-      if (!res.ok) {
-        throw new Error("Failed to fetch");
-      }
-
       const data = await res.json();
 
       setUniversities(data);
-    } catch (err) {
-      console.error("Fetch error:", err);
-      alert("Not authorized or server error");
+      setFiltered(data);
+    } catch {
+      alert("Access denied");
     } finally {
       setLoading(false);
     }
   };
+
+  /* ================= FILTER LOGIC ================= */
+
+  useEffect(() => {
+    let temp = [...universities];
+
+    /* Search */
+    if (search) {
+      temp = temp.filter((u) =>
+        u.universityName
+          .toLowerCase()
+          .includes(search.toLowerCase())
+      );
+    }
+
+    /* Country */
+    if (filters.country) {
+      temp = temp.filter((u) => u.country === filters.country);
+    }
+
+    /* Budget */
+    if (filters.maxBudget) {
+      temp = temp.filter(
+        (u) => u.tuitionFee <= Number(filters.maxBudget)
+      );
+    }
+
+    /* Percentage */
+    if (filters.minPercentage) {
+      temp = temp.filter(
+        (u) => u.minPercentage >= Number(filters.minPercentage)
+      );
+    }
+
+    /* Stream */
+    if (filters.stream) {
+      temp = temp.filter(
+        (u) => u.stream === filters.stream
+      );
+    }
+
+    /* Intake */
+    if (filters.intake) {
+      temp = temp.filter((u) =>
+        u.intakes?.includes(filters.intake)
+      );
+    }
+
+    /* Schengen */
+    if (filters.schengen) {
+      temp = temp.filter(
+        (u) => String(u.schengen) === filters.schengen
+      );
+    }
+
+    /* PR */
+    if (filters.prChance) {
+      temp = temp.filter(
+        (u) => u.prChance === filters.prChance
+      );
+    }
+
+    /* Stay Back */
+    if (filters.stayBack) {
+      temp = temp.filter(
+        (u) => u.stayBackYears >= Number(filters.stayBack)
+      );
+    }
+
+    setFiltered(temp);
+    setPage(1);
+
+  }, [filters, search, universities]);
 
   /* ================= DELETE ================= */
 
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this university?")) return;
 
-    try {
-      const token = localStorage.getItem("adminToken");
+    const token = localStorage.getItem("adminToken");
 
-      const res = await fetch(
-        `http://localhost:5000/api/admin/universities/${id}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!res.ok) {
-        throw new Error("Delete failed");
+    await fetch(
+      `http://localhost:5000/api/admin/universities/${id}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
+    );
 
-      fetchUniversities();
-    } catch (err) {
-      console.error(err);
-      alert("Delete failed");
-    }
+    fetchUniversities();
   };
+
+  /* ================= EXCEL ================= */
+
+  const exportExcel = () => {
+
+    const data = filtered.map((u, i) => ({
+      "S.No": i + 1,
+      Name: u.universityName,
+      Country: u.country,
+      City: u.city,
+      Course: u.courseName,
+      Degree: u.degree,
+      Stream: u.stream,
+      Tuition: u.tuitionFee,
+      PR: u.prChance,
+      Intake: u.intakes?.join(", "),
+      Commission: u.commissionPercent,
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(data);
+
+    const wb = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(wb, ws, "Universities");
+
+    const buf = XLSX.write(wb, {
+      bookType: "xlsx",
+      type: "array",
+    });
+
+    saveAs(new Blob([buf]), "universities.xlsx");
+  };
+
+  /* ================= PAGINATION ================= */
+
+  const totalPages = Math.ceil(filtered.length / perPage);
+
+  const data = filtered.slice(
+    (page - 1) * perPage,
+    page * perPage
+  );
 
   /* ================= UI ================= */
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
+    <div className="p-6 bg-blue-50 min-h-screen">
 
-      <h1 className="text-3xl font-bold mb-6 text-blue-700">
-        Manage Universities
-      </h1>
+      {/* HEADER */}
+      <div className="flex justify-between mb-6">
 
-      {/* Add Button */}
-      <button
-        className="mb-4 bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded"
-      >
-        + Add University
-      </button>
+        <h1 className="text-3xl font-bold text-blue-800">
+          Manage Universities
+        </h1>
 
-      {/* Loading */}
+        <div className="flex items-center gap-3">
+
+          <button
+            onClick={exportExcel}
+            className="bg-green-600 text-white px-4 py-2 rounded flex items-center gap-2"
+          >
+            <Download size={18} />
+            Excel
+          </button>
+
+          <button
+            onClick={() =>
+              navigate("/admin/universities/new")
+            }
+            className="bg-orange-500 text-white px-4 py-2 rounded flex items-center gap-2"
+          >
+            <PlusCircle size={18} />
+            Add
+          </button>
+
+        </div>
+      </div>
+
+      {/* FILTERS */}
+      <div className="bg-white p-4 rounded shadow mb-6 grid grid-cols-4 gap-3">
+
+        <input
+          placeholder="Search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="border p-2 rounded"
+        />
+
+        <input
+          placeholder="Country"
+          value={filters.country}
+          onChange={(e) =>
+            setFilters({ ...filters, country: e.target.value })
+          }
+          className="border p-2 rounded"
+        />
+
+        <input
+          placeholder="Max Budget"
+          type="number"
+          value={filters.maxBudget}
+          onChange={(e) =>
+            setFilters({ ...filters, maxBudget: e.target.value })
+          }
+          className="border p-2 rounded"
+        />
+
+        <input
+          placeholder="Min %"
+          type="number"
+          value={filters.minPercentage}
+          onChange={(e) =>
+            setFilters({
+              ...filters,
+              minPercentage: e.target.value,
+            })
+          }
+          className="border p-2 rounded"
+        />
+
+        <input
+          placeholder="Stream"
+          value={filters.stream}
+          onChange={(e) =>
+            setFilters({ ...filters, stream: e.target.value })
+          }
+          className="border p-2 rounded"
+        />
+
+        <input
+          placeholder="Intake"
+          value={filters.intake}
+          onChange={(e) =>
+            setFilters({ ...filters, intake: e.target.value })
+          }
+          className="border p-2 rounded"
+        />
+
+        <select
+          value={filters.schengen}
+          onChange={(e) =>
+            setFilters({ ...filters, schengen: e.target.value })
+          }
+          className="border p-2 rounded"
+        >
+          <option value="">Schengen</option>
+          <option value="true">Yes</option>
+          <option value="false">No</option>
+        </select>
+
+        <button
+          onClick={() =>
+            setFilters({
+              country: "",
+              maxBudget: "",
+              minPercentage: "",
+              stream: "",
+              intake: "",
+              schengen: "",
+              prChance: "",
+              stayBack: "",
+            })
+          }
+          className="bg-gray-200 rounded"
+        >
+          Clear
+        </button>
+
+      </div>
+
+      {/* LIST */}
+
       {loading && <p>Loading...</p>}
 
-      {/* Table */}
       {!loading && (
-        <div className="bg-white rounded-lg shadow overflow-x-auto">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
 
-          <table className="w-full border-collapse">
+          {data.map((u) => (
 
-            <thead className="bg-blue-600 text-white">
-              <tr>
-                <th className="p-3 text-left">Name</th>
-                <th className="p-3 text-left">Country</th>
-                <th className="p-3 text-left">Course</th>
-                <th className="p-3 text-left">Fee</th>
-                <th className="p-3 text-left">Actions</th>
-              </tr>
-            </thead>
+            <div
+              key={u._id}
+              className="bg-white p-5 rounded-xl shadow border"
+            >
 
-            <tbody>
-              {universities.map((u) => (
-                <tr
-                  key={u._id}
-                  className="border-b hover:bg-gray-50"
+              <h2 className="font-bold text-lg text-blue-700">
+                {u.universityName}
+              </h2>
+
+              <p className="text-sm text-gray-500 flex items-center gap-1 items-center">
+                <Globe size={14} />
+                {u.country}, {u.city}
+              </p>
+
+              <div className="mt-3 space-y-1 text-sm">
+
+                <p className="flex items-center gap-1">
+                  <GraduationCap size={14} />
+                  {u.degree} • {u.stream}
+                </p>
+
+                <p className="flex items-center gap-1">
+                  <BookOpen size={14} />
+                  {u.courseName}
+                </p>
+
+                <p className="flex items-center gap-1">
+                  <DollarSign size={14} />
+                  {u.tuitionFee}
+                </p>
+
+                <p className="flex items-center gap-1">
+                  <Award size={14} />
+                  PR: {u.prChance}
+                </p>
+
+                <p className="flex items-center gap-1">
+                  <Clock size={14} />
+                  Stay Back: {u.stayBackYears} yrs
+                </p>
+
+                <p className="flex items-center gap-1">
+                  <Percent size={14} />
+                  Commission: {u.commissionPercent}%
+                </p>
+
+                <p className="text-xs text-gray-400">
+                  Intake: {u.intakes?.join(", ")}
+                </p>
+
+              </div>
+
+              {/* ACTIONS */}
+
+              <div className="flex justify-between mt-4">
+
+                <button
+                  onClick={() =>
+                    navigate(`/admin/universities/edit/${u._id}`)
+                  }
+                  className="bg-blue-600 text-white px-3 py-1 rounded flex items-center gap-1"
                 >
-                  <td className="p-3">{u.universityName}</td>
-                  <td className="p-3">{u.country}</td>
-                  <td className="p-3">{u.courseName}</td>
-                  <td className="p-3">${u.tuitionFee}</td>
+                  <Edit size={14} /> Edit
+                </button>
 
-                  <td className="p-3 flex gap-2">
+                <button
+                  onClick={() => handleDelete(u._id)}
+                  className="bg-red-500 text-white px-3 py-1 rounded flex items-center gap-1"
+                >
+                  <Trash2 size={14} /> Delete
+                </button>
 
-                    <button
-                      className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-400"
-                    >
-                      Edit
-                    </button>
+              </div>
 
-                    <button
-                      onClick={() => handleDelete(u._id)}
-                      className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-400"
-                    >
-                      Delete
-                    </button>
-
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-
-          </table>
+            </div>
+          ))}
 
         </div>
       )}
+
+      {/* PAGINATION */}
+
+      {totalPages > 1 && (
+        <div className="flex justify-center gap-3 mt-8">
+
+          <button
+            disabled={page === 1}
+            onClick={() => setPage(page - 1)}
+            className="px-3 py-1 border rounded"
+          >
+            Prev
+          </button>
+
+          <span>
+            {page} / {totalPages}
+          </span>
+
+          <button
+            disabled={page === totalPages}
+            onClick={() => setPage(page + 1)}
+            className="px-3 py-1 border rounded"
+          >
+            Next
+          </button>
+
+        </div>
+      )}
+
     </div>
   );
 };
