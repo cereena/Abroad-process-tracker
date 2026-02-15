@@ -58,6 +58,7 @@ import StudentProfileGuard from "./pages/student/studentProfileGuard.jsx";
 import DocExecutiveNotifications from "./pages/documetation/DocNotification.jsx";
 import StudentProfilePage from "./pages/student/StudentProfilePage.jsx";
 import DocDocuments from "./pages/documetation/DocDocuments.jsx";
+import AdminUniversities from "./pages/admin/Universities-admin.jsx";
 
 function App() {
   return (
@@ -94,7 +95,7 @@ function App() {
             <Route path="docs-team" element={<DocsTeam />} />
             <Route path="docs-team/add" element={<AddExecutive />} />
             <Route path="applications" element={<Applications />} />
-            <Route path="universities" element={<Universities_admin />} />
+            <Route path="universities" element={<AdminUniversities />}/>
             <Route path="reports" element={<Reports />} />
             <Route path="notifications" element={<AdminNotifications />} />
             <Route path="leads" element={<AdminLeads />} />
