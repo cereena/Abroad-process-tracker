@@ -58,7 +58,7 @@ const UniversityForm = () => {
 
         const data = await res.json();
 
-        console.log("DATA FROM API:", data); // 👈 ADD THIS
+        console.log("DATA FROM API:", data);
 
         setForm({
             universityName: data.universityName || "",
@@ -67,25 +67,27 @@ const UniversityForm = () => {
             partner: data.partner || false,
             globalRanking: data.globalRanking || "",
             globallyRecognized: data.globallyRecognized || false,
+
             courseName: data.courseName || "",
             degree: data.degree || "",
             stream: data.stream || "",
             minPercentage: data.minPercentage || "",
             ielts: data.ielts || "",
+
             tuitionFee: data.tuitionFee || "",
             applicationFee: data.applicationFee || "",
             showMoney: data.showMoney || "",
             freeEducation: data.freeEducation || false,
+
             schengen: data.schengen || false,
             prChance: data.prChance || "",
             stayBackYears: data.stayBackYears || "",
             partTimeHours: data.partTimeHours || "",
+
             intakes: data.intakes?.join(", ") || "",
             commissionPercent: data.commissionPercent || "",
         });
     };
-
-
 
     /* SAVE */
 
@@ -132,7 +134,7 @@ const UniversityForm = () => {
     /* UI */
 
     return (
-        <div className="p-6 bg-blue-50 min-h-screen">
+        <div className="p-6 bg-blue-50 min-h-[100vh] w-full">
 
             <div className="max-w-4xl mx-auto bg-white p-6 rounded shadow">
 

@@ -151,8 +151,9 @@ const AdminUniversities = () => {
   /* ================= DELETE ================= */
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Delete this university?")) return;
+  if (!window.confirm("Delete this university?")) return;
 
+  try {
     const token = localStorage.getItem("adminToken");
 
     await fetch(
@@ -166,7 +167,11 @@ const AdminUniversities = () => {
     );
 
     fetchUniversities();
-  };
+  } catch (err) {
+    alert("Delete failed");
+  }
+};
+
 
   /* ================= EXCEL ================= */
 
@@ -212,17 +217,15 @@ const AdminUniversities = () => {
   /* ================= UI ================= */
 
   return (
-    <div className="p-6 bg-blue-50 min-h-screen">
+    <div className="min-h-screen w-full bg-blue-50 p-3 sm:p-6">
 
       {/* HEADER */}
-      <div className="flex justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
 
         <h1 className="text-3xl font-bold text-blue-800">
           Manage Universities
         </h1>
-
-        <div className="flex items-center gap-3">
-
+        <div className="flex flex-wrap gap-3">
           <button
             onClick={exportExcel}
             className="bg-green-600 text-white px-4 py-2 rounded flex items-center gap-2"
@@ -245,7 +248,7 @@ const AdminUniversities = () => {
       </div>
 
       {/* FILTERS */}
-      <div className="bg-white p-4 rounded shadow mb-6 grid grid-cols-4 gap-3">
+      <div className="bg-white p-4 rounded shadow mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
 
         <input
           placeholder="Search"
@@ -341,7 +344,7 @@ const AdminUniversities = () => {
       {loading && <p>Loading...</p>}
 
       {!loading && (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
 
           {data.map((u) => (
 
@@ -350,7 +353,7 @@ const AdminUniversities = () => {
               className="bg-white p-5 rounded-xl shadow border"
             >
 
-              <h2 className="font-bold text-lg text-blue-700">
+              <h2 className="font-bold text-lg text-blue-700 break-words">
                 {u.universityName}
               </h2>
 
@@ -399,7 +402,7 @@ const AdminUniversities = () => {
 
               {/* ACTIONS */}
 
-              <div className="flex justify-between mt-4">
+              <div className="flex flex-wrap gap-3 justify-between mt-4">
 
                 <button
                   onClick={() =>
@@ -428,7 +431,7 @@ const AdminUniversities = () => {
       {/* PAGINATION */}
 
       {totalPages > 1 && (
-        <div className="flex justify-center gap-3 mt-8">
+        <div className="flex flex-wrap justify-center items-center gap-3 mt-8 text-sm">
 
           <button
             disabled={page === 1}
