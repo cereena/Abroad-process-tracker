@@ -23,12 +23,12 @@ const Courses = () => {
   /* ================= FILTERS ================= */
 
   const [filters, setFilters] = useState({
+    country: "",
     maxBudget: "",
     minPercentage: "",
     stream: "",
     intake: "",
     schengen: "",
-    freeEducation: "",
     prChance: "",
     stayBack: "",
   });
@@ -37,16 +37,36 @@ const Courses = () => {
 
   useEffect(() => {
     fetchUniversities();
-  }, []);
+  }, [filters]);
 
   const fetchUniversities = async () => {
     try {
       setLoading(true);
 
-      const res = await fetch("http://localhost:5000/api/universities");
+      const params = new URLSearchParams();
+
+      if (filters.country) params.append("country", filters.country);
+      if (filters.maxBudget) params.append("maxBudget", filters.maxBudget);
+      if (filters.stream) params.append("stream", filters.stream);
+      if (filters.schengen) params.append("schengen", filters.schengen);
+      if (filters.intake) params.append("intake", filters.intake);
+      if (filters.prChance) params.append("prChance", filters.prChance);
+      if (filters.stayBack) params.append("stayBack", filters.stayBack);
+
+      const url = `http://localhost:5000/api/universities?${params.toString()}`;
+
+      const res = await fetch(url);
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch universities");
+      }
+
       const data = await res.json();
 
+      console.log("Universities:", data); // debug
+
       setUniversities(data);
+
     } catch (err) {
       console.error("Fetch error:", err);
     } finally {
@@ -61,43 +81,6 @@ const Courses = () => {
       state: { country },
     });
   };
-
-  /* ================= FILTER LOGIC ================= */
-
-  const filteredUniversities = universities.filter((item) => {
-    return (
-      /* Budget */
-      (filters.maxBudget === "" ||
-        item.tuitionFee <= Number(filters.maxBudget)) &&
-
-      /* Percentage */
-      (filters.minPercentage === "" ||
-        item.minPercentage <= Number(filters.minPercentage)) &&
-
-      /* Stream */
-      (filters.stream === "" || item.stream === filters.stream) &&
-
-      /* Intake */
-      (filters.intake === "" ||
-        item.intakes?.includes(filters.intake)) &&
-
-      /* Schengen */
-      (filters.schengen === "" ||
-        String(item.schengen) === filters.schengen) &&
-
-      /* Free Education */
-      (filters.freeEducation === "" ||
-        String(item.freeEducation) === filters.freeEducation) &&
-
-      /* PR */
-      (filters.prChance === "" ||
-        item.prChance === filters.prChance) &&
-
-      /* Stay Back */
-      (filters.stayBack === "" ||
-        item.stayBack === filters.stayBack)
-    );
-  });
 
   /* ================= UI ================= */
 
@@ -121,15 +104,43 @@ const Courses = () => {
 
       <div className="bg-white border rounded-xl p-6 max-w-6xl mx-auto shadow-sm mb-12">
 
-        <h2 className="text-lg font-semibold text-blue-700 mb-4">
-          Eligibility Filters
-        </h2>
+        <div className="flex items-center gap-2 mb-4">
+          <GraduationCap size={20} className="text-blue-600" />
+          <h2 className="text-lg font-semibold text-blue-700">
+            Eligibility Filters
+          </h2>
+        </div>
+
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
 
+
+          {/* Country */}
+          <select
+            className="border rounded-lg px-3 py-2 bg-blue-50 text-sm 
+            focus:outline-none focus:ring-2 focus:ring-blue-400 
+            hover:border-blue-400 transition"
+
+            value={filters.country}
+            onChange={(e) =>
+              setFilters({ ...filters, country: e.target.value })
+            }
+          >
+            <option value="">All Countries</option>
+            <option value="Germany">Germany</option>
+            <option value="Canada">Canada</option>
+            <option value="UK">UK</option>
+            <option value="France">France</option>
+            <option value="Poland">Poland</option>
+            <option value="Ireland">Ireland</option>
+          </select>
+
           {/* Budget */}
           <select
-            className="border rounded-lg p-2"
+            className="border rounded-lg px-3 py-2 bg-blue-50 text-sm 
+            focus:outline-none focus:ring-2 focus:ring-blue-400 
+            hover:border-blue-400 transition"
+
             value={filters.maxBudget}
             onChange={(e) =>
               setFilters({ ...filters, maxBudget: e.target.value })
@@ -144,7 +155,10 @@ const Courses = () => {
 
           {/* Percentage */}
           <select
-            className="border rounded-lg p-2"
+            className="border rounded-lg px-3 py-2 bg-blue-50 text-sm 
+            focus:outline-none focus:ring-2 focus:ring-blue-400 
+            hover:border-blue-400 transition"
+
             value={filters.minPercentage}
             onChange={(e) =>
               setFilters({ ...filters, minPercentage: e.target.value })
@@ -159,7 +173,10 @@ const Courses = () => {
 
           {/* Stream */}
           <select
-            className="border rounded-lg p-2"
+            className="border rounded-lg px-3 py-2 bg-blue-50 text-sm 
+            focus:outline-none focus:ring-2 focus:ring-blue-400 
+            hover:border-blue-400 transition"
+
             value={filters.stream}
             onChange={(e) =>
               setFilters({ ...filters, stream: e.target.value })
@@ -176,7 +193,10 @@ const Courses = () => {
 
           {/* Intake */}
           <select
-            className="border rounded-lg p-2"
+            className="border rounded-lg px-3 py-2 bg-blue-50 text-sm 
+            focus:outline-none focus:ring-2 focus:ring-blue-400 
+            hover:border-blue-400 transition"
+
             value={filters.intake}
             onChange={(e) =>
               setFilters({ ...filters, intake: e.target.value })
@@ -193,7 +213,10 @@ const Courses = () => {
 
           {/* Schengen */}
           <select
-            className="border rounded-lg p-2"
+            className="border rounded-lg px-3 py-2 bg-blue-50 text-sm 
+            focus:outline-none focus:ring-2 focus:ring-blue-400 
+            hover:border-blue-400 transition"
+
             value={filters.schengen}
             onChange={(e) =>
               setFilters({ ...filters, schengen: e.target.value })
@@ -206,7 +229,10 @@ const Courses = () => {
 
           {/* PR */}
           <select
-            className="border rounded-lg p-2"
+            className="border rounded-lg px-3 py-2 bg-blue-50 text-sm 
+            focus:outline-none focus:ring-2 focus:ring-blue-400 
+            hover:border-blue-400 transition"
+
             value={filters.prChance}
             onChange={(e) =>
               setFilters({ ...filters, prChance: e.target.value })
@@ -220,7 +246,10 @@ const Courses = () => {
 
           {/* Stay Back */}
           <select
-            className="border rounded-lg p-2"
+            className="border rounded-lg px-3 py-2 bg-blue-50 text-sm 
+            focus:outline-none focus:ring-2 focus:ring-blue-400 
+            hover:border-blue-400 transition"
+
             value={filters.stayBack}
             onChange={(e) =>
               setFilters({ ...filters, stayBack: e.target.value })
@@ -231,19 +260,6 @@ const Courses = () => {
             <option value="18 Months">18 Months</option>
             <option value="2 Years">2 Years</option>
             <option value="3 Years">3 Years</option>
-          </select>
-
-          {/* Free Education */}
-          <select
-            className="border rounded-lg p-2"
-            value={filters.freeEducation}
-            onChange={(e) =>
-              setFilters({ ...filters, freeEducation: e.target.value })
-            }
-          >
-            <option value="">Free Education</option>
-            <option value="true">Available</option>
-            <option value="false">Not Available</option>
           </select>
 
         </div>
@@ -262,7 +278,7 @@ const Courses = () => {
 
         {/* Data */}
         {!loading &&
-          filteredUniversities.map((item) => (
+          universities.map((item) => (
             <div
               key={item._id}
               className="bg-white border rounded-xl p-6 hover:shadow-lg transition flex flex-col"
@@ -326,7 +342,7 @@ const Courses = () => {
               {/* CTA */}
               <button
                 onClick={() => handleTalkToExpert(item.country)}
-                className="mt-6 w-full bg-orange-600 hover:bg-orange-500 text-white py-2 rounded-lg font-medium transition"
+                className="mt-6 w-full bg-orange-400 hover:bg-orange-500 text-white py-2 rounded-lg font-medium transition"
               >
                 Talk to Expert
               </button>
@@ -335,7 +351,7 @@ const Courses = () => {
           ))}
 
         {/* No Result */}
-        {!loading && filteredUniversities.length === 0 && (
+        {!loading && universities.length === 0 && (
           <p className="col-span-full text-center text-slate-500">
             No universities match your criteria.
           </p>
