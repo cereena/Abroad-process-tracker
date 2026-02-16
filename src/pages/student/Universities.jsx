@@ -1,48 +1,77 @@
-import { useState } from "react";
-
-const universitiesData = [
-  {
-    id: 1,
-    name: "University of Toronto",
-    country: "Canada",
-    course: "Computer Science",
-    intake: "Fall 2026",
-    status: "Not Applied",
-    logo: "https://upload.wikimedia.org/wikipedia/en/0/04/Utoronto_coa.svg",
-  },
-  {
-    id: 2,
-    name: "University of Melbourne",
-    country: "Australia",
-    course: "Data Science",
-    intake: "July 2026",
-    status: "Applied",
-    logo: "https://upload.wikimedia.org/wikipedia/en/7/7e/University_of_Melbourne_coat_of_arms.svg",
-  },
-  {
-    id: 3,
-    name: "University of Oxford",
-    country: "UK",
-    course: "Artificial Intelligence",
-    intake: "Fall 2026",
-    status: "Offer Received",
-    logo: "https://upload.wikimedia.org/wikipedia/en/d/d3/University_of_Oxford_coat_of_arms.svg",
-  },
-];
+import { useEffect, useState } from "react";
 
 const Universities = () => {
+  const [universities, setUniversities] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const [country, setCountry] = useState("All");
   const [intake, setIntake] = useState("All");
 
-  const filteredUniversities = universitiesData.filter((u) => {
+  // Fetch universities
+  useEffect(() => {
+    const fetchUniversities = async () => {
+      try {
+        const res = await fetch("/api/universities");
+
+        if (!res.ok) {
+          throw new Error("Failed to fetch universities");
+        }
+
+        const data = await res.json();
+        setUniversities(data);
+      } catch (err) {
+        console.error("Error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUniversities();
+  }, []);
+
+  // Filter
+  const filteredUniversities = universities.filter((u) => {
     return (
       (country === "All" || u.country === country) &&
       (intake === "All" || u.intake === intake)
     );
   });
 
+  if (loading) {
+    return <p className="text-center">Loading universities...</p>;
+  }
+
+  const token = localStorage.getItem("token"); // or studentToken
+
+  const handleAdd = async (uni) => {
+    try {
+      const res = await fetch("/api/application/save", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          universityId: uni._id,
+          course: uni.course,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message);
+      }
+
+      alert("Added to application");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to add");
+    }
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-blue-50">
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-blue-900">Universities</h1>
@@ -79,15 +108,17 @@ const Universities = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredUniversities.map((uni) => (
           <div
-            key={uni.id}
+            key={uni._id}
             className="bg-white rounded-xl shadow p-6 flex flex-col justify-between"
           >
             <div>
-              <img
-                src={uni.logo}
-                alt={uni.name}
-                className="h-14 mb-4 object-contain"
-              />
+              {uni.logo && (
+                <img
+                  src={uni.logo}
+                  alt={uni.name}
+                  className="h-14 mb-4 object-contain"
+                />
+              )}
 
               <h3 className="text-lg font-semibold text-blue-900">
                 {uni.name}
@@ -99,35 +130,18 @@ const Universities = () => {
                 <p>
                   <span className="font-medium">Course:</span> {uni.course}
                 </p>
+
                 <p>
                   <span className="font-medium">Intake:</span> {uni.intake}
                 </p>
               </div>
-
-              <span
-                className={`inline-block mt-4 px-3 py-1 rounded-full text-xs font-semibold
-                ${
-                  uni.status === "Offer Received"
-                    ? "bg-green-100 text-green-700"
-                    : uni.status === "Applied"
-                    ? "bg-blue-100 text-blue-700"
-                    : "bg-gray-100 text-gray-600"
-                }`}
-              >
-                {uni.status}
-              </span>
             </div>
 
             <button
-              className={`mt-6 w-full py-2 rounded-lg font-semibold
-              ${
-                uni.status === "Not Applied"
-                  ? "bg-blue-600 text-white hover:bg-blue-700"
-                  : "bg-gray-200 text-gray-600 cursor-not-allowed"
-              }`}
-              disabled={uni.status !== "Not Applied"}
+              className="mt-6 w-full py-2 rounded-lg font-semibold bg-blue-600 text-white hover:bg-blue-700"
+              onClick={() => handleAdd(uni)}
             >
-              {uni.status === "Not Applied" ? "Apply Now" : "View Status"}
+              Add to Application
             </button>
           </div>
         ))}

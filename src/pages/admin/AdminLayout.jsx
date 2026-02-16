@@ -25,13 +25,11 @@ export default function AdminLayout() {
       {/* SIDEBAR */}
       <aside
         className={`
-      sticky top-0 lg:static
-      w-64 min-h-screen bg-blue-900 text-white p-5
-      transform transition-transform duration-300
-      ${open ? "translate-x-0" : "-translate-x-full"}
-      lg:translate-x-0
-      z-50
-      `}
+    fixed top-0 left-0 h-full w-64 bg-blue-900 text-white p-5
+    transform transition-transform duration-300 z-50
+    ${open ? "translate-x-0" : "-translate-x-full"}
+    lg:relative lg:translate-x-0 lg:sticky lg:h-auto
+  `}
       >
 
         {/* MOBILE CLOSE */}

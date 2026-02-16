@@ -1,12 +1,30 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-const UniversityForm = () => {
+const ENUMS = {
+    degree: ["Bachelors", "Masters", "PhD", "Diploma"],
 
+    stream: [
+        "Computer Science",
+        "Engineering",
+        "Business",
+        "Health",
+        "Arts",
+        "Science",
+    ],
+
+    ielts: ["Required", "Waiver", "Not Required"],
+
+    prChance: ["Low", "Medium", "High"],
+};
+
+const UniversityForm = () => {
     const navigate = useNavigate();
     const { id } = useParams();
 
     const isEdit = Boolean(id);
+
+    const [loading, setLoading] = useState(false);
 
     const [form, setForm] = useState({
         universityName: "",
@@ -36,187 +54,233 @@ const UniversityForm = () => {
         commissionPercent: "",
     });
 
-    /* LOAD EDIT */
+    /* ================= LOAD EDIT ================= */
 
     useEffect(() => {
         if (isEdit) fetchOne();
     }, [id]);
 
     const fetchOne = async () => {
-        const token = localStorage.getItem("adminToken");
+        try {
+            setLoading(true);
 
-        const res = await fetch(
-            `http://localhost:5000/api/admin/universities/${id}`,
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+            const token = localStorage.getItem("adminToken");
+
+            const res = await fetch(
+                `http://localhost:5000/api/admin/universities/${id}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            if (!res.ok) {
+                throw new Error("Failed to load university");
             }
-        );
 
-        console.log("STATUS:", res.status);
+            const data = await res.json();
 
-        const data = await res.json();
+            console.log("DATA FROM API:", data);
 
-        console.log("DATA FROM API:", data);
+            setForm({
+                universityName: data.universityName || "",
+                country: data.country || "",
+                city: data.city || "",
+                partner: data.partner || false,
+                globalRanking: data.globalRanking || "",
+                globallyRecognized: data.globallyRecognized || false,
 
-        setForm({
-            universityName: data.universityName || "",
-            country: data.country || "",
-            city: data.city || "",
-            partner: data.partner || false,
-            globalRanking: data.globalRanking || "",
-            globallyRecognized: data.globallyRecognized || false,
+                courseName: data.courseName || "",
+                degree: data.degree || "",
+                stream: data.stream || "",
+                minPercentage: data.minPercentage || "",
+                ielts: data.ielts || "",
 
-            courseName: data.courseName || "",
-            degree: data.degree || "",
-            stream: data.stream || "",
-            minPercentage: data.minPercentage || "",
-            ielts: data.ielts || "",
+                tuitionFee: data.tuitionFee || "",
+                applicationFee: data.applicationFee || "",
+                showMoney: data.showMoney || "",
+                freeEducation: data.freeEducation || false,
 
-            tuitionFee: data.tuitionFee || "",
-            applicationFee: data.applicationFee || "",
-            showMoney: data.showMoney || "",
-            freeEducation: data.freeEducation || false,
+                schengen: data.schengen || false,
+                prChance: data.prChance || "",
+                stayBackYears: data.stayBackYears || "",
+                partTimeHours: data.partTimeHours || "",
 
-            schengen: data.schengen || false,
-            prChance: data.prChance || "",
-            stayBackYears: data.stayBackYears || "",
-            partTimeHours: data.partTimeHours || "",
-
-            intakes: data.intakes?.join(", ") || "",
-            commissionPercent: data.commissionPercent || "",
-        });
+                intakes: data.intakes?.join(", ") || "",
+                commissionPercent: data.commissionPercent || "",
+            });
+        } catch (err) {
+            console.error(err);
+            alert("Failed to load data");
+            navigate(-1);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    /* SAVE */
+    /* ================= CHANGE HANDLER ================= */
+
+    const handleChange = (e) => {
+        const { name, value, type, checked } = e.target;
+
+        setForm((prev) => ({
+            ...prev,
+            [name]: type === "checkbox" ? checked : value,
+        }));
+    };
+
+    /* ================= SAVE ================= */
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const token = localStorage.getItem("adminToken");
+        try {
+            setLoading(true);
 
-        const payload = {
-            ...form,
+            const token = localStorage.getItem("adminToken");
 
-            globalRanking: Number(form.globalRanking),
-            minPercentage: Number(form.minPercentage),
+            const payload = {
+                ...form,
 
-            tuitionFee: Number(form.tuitionFee),
-            applicationFee: Number(form.applicationFee),
-            showMoney: Number(form.showMoney),
+                globalRanking: Number(form.globalRanking),
+                minPercentage: Number(form.minPercentage),
 
-            stayBackYears: Number(form.stayBackYears),
-            partTimeHours: Number(form.partTimeHours),
-            commissionPercent: Number(form.commissionPercent),
+                tuitionFee: Number(form.tuitionFee),
+                applicationFee: Number(form.applicationFee),
+                showMoney: Number(form.showMoney),
 
-            intakes: form.intakes.split(",").map(i => i.trim()),
-        };
+                stayBackYears: Number(form.stayBackYears),
+                partTimeHours: Number(form.partTimeHours),
+                commissionPercent: Number(form.commissionPercent),
 
-        const url = isEdit
-            ? `http://localhost:5000/api/admin/universities/${id}`
-            : "http://localhost:5000/api/admin/universities";
+                intakes: form.intakes
+                    .split(",")
+                    .map((i) => i.trim())
+                    .filter(Boolean),
+            };
 
-        const method = isEdit ? "PUT" : "POST";
+            console.log("SENDING:", payload);
 
-        await fetch(url, {
-            method,
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify(payload),
-        });
+            const url = isEdit
+                ? `http://localhost:5000/api/admin/universities/${id}`
+                : "http://localhost:5000/api/admin/universities";
 
-        navigate("/admin/universities");
+            const method = isEdit ? "PUT" : "POST";
+
+            const res = await fetch(url, {
+                method,
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify(payload),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.message || "Save failed");
+            }
+
+            alert(isEdit ? "Updated Successfully" : "Created Successfully");
+
+            navigate("/admin/universities");
+        } catch (err) {
+            console.error(err);
+            alert(err.message || "Something went wrong");
+        } finally {
+            setLoading(false);
+        }
     };
 
-    /* UI */
+    /* ================= UI ================= */
+
+    if (loading) {
+        return (
+            <div className="p-6 text-center text-gray-600">
+                Loading...
+            </div>
+        );
+    }
 
     return (
-        <div className="p-6 bg-blue-50 min-h-[100vh] w-full">
+        <div className="p-4 sm:p-6 bg-blue-50 min-h-screen w-full">
+            <div className="max-w-3xl mx-auto bg-white p-4 sm:p-6 rounded-lg shadow">
 
-            <div className="max-w-4xl mx-auto bg-white p-6 rounded shadow">
-
-                <h1 className="text-2xl font-bold mb-6 text-blue-700">
+                <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-blue-700">
                     {isEdit ? "Edit University" : "Add University"}
                 </h1>
 
                 <form
                     onSubmit={handleSubmit}
-                    className="grid grid-cols-2 gap-4"
+                    className="grid grid-cols-1 sm:grid-cols-2 gap-4"
                 >
-
                     {Object.keys(form).map((key) => (
-                        <label key={key} className="text-sm">
-
-                            {key.replace(/([A-Z])/g, " $1")}
+                        <label key={key} htmlFor={key} className="text-sm flex flex-col gap-1 w-full">
+                            <span className="capitalize text-gray-700">{key.replace(/([A-Z])/g, " $1")}</span>
 
                             {typeof form[key] === "boolean" ? (
-                                <input
-                                    type="checkbox"
-                                    checked={form[key]}
-                                    onChange={(e) =>
-                                        setForm({
-                                            ...form,
-                                            [key]: e.target.checked,
-                                        })
-                                    }
-                                    className="mt-2"
-                                />
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        id={key}
+                                        name={key}
+                                        type="checkbox"
+                                        checked={form[key]}
+                                        onChange={handleChange}
+                                        className="h-4 w-4"
+                                    />
+                                    <span className="text-sm">{key.replace(/([A-Z])/g, " $1")}</span>
+                                </div>
+                            ) : ENUMS[key] ? (
+                                <select
+                                    id={key}
+                                    name={key}
+                                    value={form[key]}
+                                    onChange={handleChange}
+                                    required
+                                    className="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white w-full"
+                                >
+                                    <option value="">Select</option>
+                                    {ENUMS[key].map((opt) => (
+                                        <option key={opt} value={opt}>
+                                            {opt}
+                                        </option>
+                                    ))}
+                                </select>
                             ) : (
                                 <input
-                                    type={
-                                        [
-                                            "globalRanking",
-                                            "minPercentage",
-                                            "tuitionFee",
-                                            "applicationFee",
-                                            "showMoney",
-                                            "stayBackYears",
-                                            "partTimeHours",
-                                            "commissionPercent",
-                                        ].includes(key)
-                                            ? "number"
-                                            : "text"
-                                    }
+                                    id={key}
+                                    name={key}
+                                    type={["globalRanking", "minPercentage", "tuitionFee", "applicationFee", "showMoney", "stayBackYears", "partTimeHours", "commissionPercent"].includes(key) ? "number" : "text"}
                                     value={form[key]}
-                                    onChange={(e) =>
-                                        setForm({
-                                            ...form,
-                                            [key]: e.target.value,
-                                        })
-                                    }
-                                    className="border p-2 w-full rounded mt-1"
+                                    onChange={handleChange}
+                                    className="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-300 w-full"
                                 />
                             )}
-
                         </label>
                     ))}
 
-
-                    <div className="col-span-2 flex items-center gap-4 mt-4">
-
+                    <div className="col-span-1 sm:col-span-2 flex flex-wrap gap-4 mt-6 justify-start sm:justify-end">
                         <button
                             type="submit"
-                            className="bg-orange-500 text-white px-6 py-2 rounded"
+                            disabled={loading}
+                            className="bg-orange-500 text-white px-6 py-2 rounded hover:bg-orange-600 transition disabled:opacity-60"
                         >
                             {isEdit ? "Update" : "Create"}
                         </button>
-
                         <button
                             type="button"
                             onClick={() => navigate(-1)}
-                            className="border px-6 py-2 rounded"
+                            className="border px-6 py-2 rounded hover:bg-gray-100 transition"
                         >
                             Cancel
                         </button>
-
                     </div>
-
                 </form>
             </div>
         </div>
+
     );
 };
 

@@ -43,7 +43,24 @@ const AdminUniversities = () => {
   /* PAGINATION */
 
   const [page, setPage] = useState(1);
-  const perPage = 9;
+
+  const [perPage, setPerPage] = useState(9);
+
+useEffect(() => {
+  const updatePerPage = () => {
+    const w = window.innerWidth;
+
+    if (w < 640) setPerPage(6); // mobile
+    else if (w < 1024) setPerPage(10); // tablet
+    else setPerPage(9); // desktop
+  };
+
+  updatePerPage(); // initial
+  window.addEventListener("resize", updatePerPage);
+
+  return () => window.removeEventListener("resize", updatePerPage);
+}, []);
+
 
   /* ================= FETCH ================= */
 
@@ -248,8 +265,7 @@ const AdminUniversities = () => {
       </div>
 
       {/* FILTERS */}
-      <div className="bg-white p-4 rounded shadow mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-
+      <div className="bg-white p-4 rounded shadow mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 lg:grid-cols-4 gap-3">
         <input
           placeholder="Search"
           value={search}
@@ -332,8 +348,7 @@ const AdminUniversities = () => {
               stayBack: "",
             })
           }
-          className="bg-gray-200 rounded"
-        >
+         className="bg-gray-200 rounded px-2 py-1 w-full sm:w-auto">
           Clear
         </button>
 
@@ -350,7 +365,7 @@ const AdminUniversities = () => {
 
             <div
               key={u._id}
-              className="bg-white p-5 rounded-xl shadow border"
+              className="bg-white p-5 rounded-xl shadow border flex flex-col justify-between h-full"
             >
 
               <h2 className="font-bold text-lg text-blue-700 break-words">
