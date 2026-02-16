@@ -448,13 +448,22 @@ const Universities = () => {
 
                 return (
                   <button
-                    disabled={isAdded}onClick={() => handleAdd(u)}
-                    className={`mt-6 w-full py-2 rounded-lg font-semibold
-                     ${isAdded
+                    disabled={isAdded}
+                    onClick={() => handleAdd(u)}
+                    className={`mt-6 w-full py-2 rounded-lg font-semibold flex items-center justify-center gap-2
+                    ${isAdded
                         ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                        : "bg-blue-600 text-white hover:bg-blue-700"
-                      }`} >
-                    {isAdded ? "Added" : "Add to Application"}
+                        : "bg-orange-500 text-white hover:bg-orange-400"
+                      }`}
+                  >
+                    {isAdded ? (
+                      "Added"
+                    ) : (
+                      <>
+                        <PlusCircle size={20} />
+                        Add to Application
+                      </>
+                    )}
                   </button>
                 );
               })()}

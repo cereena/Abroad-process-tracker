@@ -40,7 +40,7 @@ export default function DocLayout() {
       </aside>
 
       {/* ===== RIGHT SECTION ===== */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col bg-blue-50">
 
         {/* ===== TOP HEADER ===== */}
         <header className="bg-white shadow px-6 py-4 flex justify-between items-center">
