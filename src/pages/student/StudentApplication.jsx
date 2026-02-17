@@ -9,6 +9,33 @@ import {
 } from "lucide-react";
 
 const StudentApplications = () => {
+
+  const markInterested = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(
+        `http://localhost:5000/api/application/interested/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message);
+
+      alert("Interest sent ✅");
+
+      fetchSuggestions(); // refresh UI
+    } catch (err) {
+      alert(err.message || "Failed");
+    }
+  };
+
   /* ================= STATE ================= */
   const [suggestions, setSuggestions] = useState([]);
   const [preferences, setPreferences] = useState([]);
@@ -237,40 +264,101 @@ const StudentApplications = () => {
 
       {/* ================= SUGGESTIONS ================= */}
 
-      <div className="bg-white p-6 rounded-xl shadow">
+      {/* ================= SUGGESTIONS ================= */}
 
-        <h2 className="text-xl font-semibold mb-3 flex items-center gap-2 text-blue-700">
+      <div>
+
+        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-blue-700">
           <BookOpen size={22} />
           Suggested by Executive
         </h2>
 
         {suggestions.length === 0 ? (
-          <p className="text-gray-500">No suggestions yet.</p>
+
+          <p className="text-gray-500 bg-white p-4 rounded shadow">
+            No suggestions yet.
+          </p>
+
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+
             {suggestions.map((s) => (
+
               <div
                 key={s._id}
-                className="border p-4 rounded shadow"
+                className="bg-white rounded-xl shadow border hover:shadow-lg transition flex flex-col justify-between"
               >
-                <h3 className="font-semibold text-blue-700">
-                  {s.university?.universityName}
-                </h3>
 
-                <p className="text-sm">
-                  Course: {s.course}
-                </p>
+                {/* HEADER */}
+                <div className="p-4 border-b bg-orange-50 rounded-t-xl">
 
-                <p className="text-xs text-gray-400">
-                  Suggested by {s.suggestedBy?.name}
-                </p>
+                  <h3 className="font-bold text-orange-700 text-lg break-words">
+                    {s.university?.universityName || "Unknown University"}
+                  </h3>
+
+                  <p className="text-sm text-gray-500 flex items-center gap-1 mt-1">
+                    <Globe size={14} />
+                    {s.university?.country || "N/A"}
+                  </p>
+
+                </div>
+
+                {/* BODY */}
+                <div className="p-4 space-y-2 text-sm">
+
+                  <p className="flex items-center gap-2">
+                    <GraduationCap size={14} />
+                    {s.university?.degree} • {s.university?.stream}
+                  </p>
+
+                  <p className="flex items-center gap-2">
+                    <BookOpen size={14} />
+                    {s.course || s.university?.courseName}
+                  </p>
+
+                  <p className="flex items-center gap-2">
+                    <Clock size={14} />
+                    Intake: {s.university?.intakes?.join(", ") || "N/A"}
+                  </p>
+
+                </div>
+
+                {/* FOOTER */}
+                <div className="p-3 border-t bg-gray-50 flex justify-between items-center text-xs rounded-b-xl">
+
+                  {/* Status */}
+                  {s.interested ? (
+
+                    <span className="text-green-600 font-semibold flex items-center gap-1">
+                      <CheckCircle size={14} />
+                      Interested
+                    </span>
+
+                  ) : (
+
+                    <span className="text-gray-400">
+                      Not decided
+                    </span>
+
+                  )}
+                  {/* Button */}
+                  {!s.interested && (
+                    <button
+                      onClick={() => markInterested(s._id)}
+                      className="px-3 py-1 bg-orange-500 text-white rounded hover:bg-orange-400 text-xs"
+                    >
+                      I'm Interested
+                    </button>
+
+
+                  )}
+                </div>
               </div>
             ))}
           </div>
         )}
-
       </div>
-
     </div>
   );
 };

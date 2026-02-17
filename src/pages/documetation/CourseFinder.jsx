@@ -199,7 +199,7 @@ const Universities = () => {
       if (!token) return;
 
       const res = await fetch(
-        "http://localhost:5000/api/application/suggest",
+        `http://localhost:5000/api/application/suggest/${selectedStudent}`,
         {
           method: "POST",
           headers: {
@@ -207,13 +207,11 @@ const Universities = () => {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            studentId: selectedStudent,
             universityId: uni._id,
             course: uni.courseName,
           }),
         }
       );
-
 
       const data = await res.json();
 
@@ -267,10 +265,8 @@ const Universities = () => {
           />
 
           {/* Dropdown */}
-          {showStudents && (
-
-            <div className="absolute z-20 w-full bg-white border rounded shadow max-h-60 overflow-y-auto">
-
+          {showStudents && studentSearch && (
+            <div className="absolute z-50 w-full bg-white border rounded shadow max-h-60 overflow-y-auto">
               {students
                 .filter((s) =>
                   studentSearch
@@ -285,11 +281,13 @@ const Universities = () => {
 
                   <div
                     key={s._id}
-                    onClick={() => {
+                    onMouseDown={() => {
+                      console.log("STUDENT SELECTED:", s._id);
                       setSelectedStudent(s._id);
                       setStudentSearch(`${s.name} (${s.email})`);
                       setShowStudents(false);
                     }}
+
                     className="p-2 hover:bg-blue-50 cursor-pointer text-sm"
                   >
                     {s.name} ({s.email})
@@ -365,9 +363,10 @@ const Universities = () => {
       </div>
 
       {selectedStudent && (
-        <p className="text-sm text-green-600 mt-1">
-          ✅ Student selected
+        <p className="text-xs text-gray-500">
+          ID: {selectedStudent}
         </p>
+
       )}
 
 
