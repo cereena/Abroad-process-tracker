@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
+
 export default function DocExecutiveNotifications() {
   const [notifications, setNotifications] = useState([]);
   const [error, setError] = useState("");
@@ -79,6 +80,23 @@ export default function DocExecutiveNotifications() {
           >
             <h4 className="font-bold text-lg">{note.title}</h4>
             <p className="text-gray-700">{note.message}</p>
+            {/* View Application button (for interest notifications) */}
+            {note.link && (
+              <button
+                onClick={() => {
+                  markAsRead(note._id);
+                  if (note.link?.startsWith("/docExecutive")) {
+                    navigate(note.link);
+                  } else {
+                    console.warn("Invalid link:", note.link);
+                  }
+
+                }}
+                className="mt-3 bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-500"
+              >
+                View Application
+              </button>
+            )}
 
 
             {/* Student info */}

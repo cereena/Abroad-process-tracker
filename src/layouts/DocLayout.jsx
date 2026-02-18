@@ -24,7 +24,7 @@ export default function DocLayout() {
           <NavLink to="students" className="block hover:text-orange-300">
             Students
           </NavLink>
-          <NavLink to="applications" className="block hover:text-orange-300">
+          <NavLink to="applications/:id" className="block hover:text-orange-300">
             Applications
           </NavLink>
           <NavLink to="commission" className="block hover:text-orange-300">
