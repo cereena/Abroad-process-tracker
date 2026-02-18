@@ -27,12 +27,12 @@ export default function DocExecutiveNotifications() {
           }
         );
 
-        // 🔒 Always normalize response
+        //  Always normalize response
         setNotifications(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
         console.error("Notification fetch error:", err);
         setError("Unauthorized or forbidden");
-        setNotifications([]); // 🔒 prevent crash
+        setNotifications([]); // prevent crash
       }
     };
 
@@ -133,16 +133,13 @@ export default function DocExecutiveNotifications() {
                     alert("Student ID missing!");
                     return;
                   }
-
                   markAsRead(note._id);
-
                   navigate(`/docExecutive/documents?student=${sid}`);
                 }}
               >
                 View Documents
               </button>
             )}
-
 
             <small className="text-gray-400 block mt-3">
               {new Date(note.createdAt).toLocaleString()}

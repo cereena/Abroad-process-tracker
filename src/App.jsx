@@ -61,9 +61,21 @@ import DocDocuments from "./pages/documetation/DocDocuments.jsx";
 import AdminUniversities from "./pages/admin/Universities-admin.jsx";
 import UniversityForm from "./pages/admin/UniversityForm.jsx";
 
+
+import { useLocation } from "react-router-dom";
+import DocPreferences from "./pages/documetation/DocPreferences.jsx";
+
+function Debug() {
+  const location = useLocation();
+  console.log("Current path:", location.pathname);
+  return null;
+}
+
 function App() {
   return (
     <BrowserRouter>
+
+    <Debug />
       {/* ✅ Toast must be outside Routes */}
       <ToastContainer
         position="top-right"
@@ -113,6 +125,7 @@ function App() {
             <Route path="dashboard" element={<DocDashboard />} />
             <Route path="students" element={<DocStudents />} />
             <Route path="students/:id" element={<DocStudentProfile />} />
+            <Route path="preferences" element={<DocPreferences />} />
             <Route path="applications" element={<DocApplications />} />
             <Route path="commission" element={<DocsCommission />} />
             <Route path="course-finder" element={<CourseFinder />} />

@@ -17,13 +17,14 @@ export default function DocApplications() {
         }
 
         const res = await axios.get(
-          "http://localhost:5000/api/application/assigned",
+          "http://localhost:5000/api/application/interested",
           {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           }
         );
+        console.log(applications);
 
         setApplications(res.data || []);
       } catch (err) {
@@ -36,6 +37,28 @@ export default function DocApplications() {
 
     fetchApplications();
   }, []);
+
+  const handleApply = async (id) => {
+    try {
+      const token = localStorage.getItem("docToken");
+
+      await axios.post(
+        "http://localhost:5000/api/application/apply",
+        { suggestionId: id },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      alert("Applied Successfully");
+      window.location.reload();
+
+    } catch {
+      alert("Apply failed");
+    }
+  };
 
   /* ================= STATES ================= */
 
@@ -56,7 +79,7 @@ export default function DocApplications() {
         <h2 className="text-xl font-bold">University Applications</h2>
 
         <button className="border border-blue-600 text-blue-600 px-3 py-1 rounded">
-          🔍 Filter
+          Filter
         </button>
       </div>
 
@@ -67,69 +90,78 @@ export default function DocApplications() {
         </p>
       )}
 
+
       {/* TABLE */}
       {applications.length > 0 && (
         <div className="overflow-x-auto bg-white rounded shadow">
           <table className="w-full border-collapse">
+
             <thead className="bg-gray-100 text-sm">
               <tr>
                 <th className="p-3 border">Student</th>
-                <th className="p-3 border">Email</th>
+                <th className="p-3 border">University</th>
+                <th className="p-3 border">Course</th>
                 <th className="p-3 border">Status</th>
-                <th className="p-3 border">Visa Status</th>
-                <th className="p-3 border">Created</th>
+                <th className="p-3 border">Visa</th>
                 <th className="p-3 border">Action</th>
               </tr>
             </thead>
 
             <tbody>
-              {applications.map((app) => (
-                <tr
-                  key={app._id}
-                  className="hover:bg-gray-50 text-sm"
-                >
-                  {/* Student */}
-                  <td className="p-3 border font-semibold">
-                    {app.studentId?.name || "N/A"}
-                  </td>
-
-                  {/* Email */}
-                  <td className="p-3 border">
-                    {app.studentId?.email || "N/A"}
-                  </td>
-
-                  {/* App Status */}
-                  <td className="p-3 border">
-                    <StatusBadge value={app.applicationStatus} />
-                  </td>
-
-                  {/* Visa */}
-                  <td className="p-3 border">
-                    <StatusBadge value={app.visaStatus} />
-                  </td>
-
-                  {/* Date */}
-                  <td className="p-3 border">
-                    {new Date(app.createdAt).toLocaleDateString()}
-                  </td>
-
-                  {/* Action */}
-                  <td className="p-3 border">
-                    <button
-                      className="px-3 py-1 bg-blue-600 text-white rounded text-xs"
-                      onClick={() =>
-                        alert(`View ${app.studentId?.name}`)
-                      }
+              {applications.map(app =>
+                app.executiveSuggestions
+                  ?.filter(s => s.interested)
+                  .map(s => (
+                    <tr
+                      key={s._id}
+                      className="hover:bg-gray-50 text-sm"
                     >
-                      View
-                    </button>
-                  </td>
-                </tr>
-              ))}
+
+                      {/* Student */}
+                      <td className="p-3 border font-semibold">
+                        {app.studentId?.name || "N/A"}
+                      </td>
+
+                      {/* University */}
+                      <td className="p-3 border">
+                        {s.university?.name || "N/A"}
+                      </td>
+
+                      {/* Course */}
+                      <td className="p-3 border">
+                        {s.university?.course || "-"}
+                      </td>
+
+                      {/* App Status */}
+                      <td className="p-3 border">
+                        <StatusBadge value={app.applicationStatus} />
+                      </td>
+
+                      {/* Visa */}
+                      <td className="p-3 border">
+                        <StatusBadge value={app.visaStatus} />
+                      </td>
+
+                      {/* Action */}
+                      <td className="p-3 border">
+                        <button
+                          className="px-3 py-1 bg-green-600 text-white rounded text-xs"
+                          onClick={() => handleApply(s._id)}
+                        >
+                          Apply
+                        </button>
+
+                      </td>
+
+                    </tr>
+                  ))
+              )}
             </tbody>
+
           </table>
         </div>
       )}
+
     </div>
   );
 }

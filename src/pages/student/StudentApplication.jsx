@@ -10,6 +10,7 @@ import {
 
 const StudentApplications = () => {
 
+
   const markInterested = async (id) => {
     try {
       const token = localStorage.getItem("token");
@@ -40,6 +41,7 @@ const StudentApplications = () => {
   const [suggestions, setSuggestions] = useState([]);
   const [preferences, setPreferences] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [applied, setApplied] = useState([]);
 
   /* ================= FETCH ================= */
   const fetchSuggestions = async () => {
@@ -90,11 +92,15 @@ const StudentApplications = () => {
         }
       );
 
-      if (!res.ok) throw new Error("Failed to fetch");
+      if (!res.ok) throw new Error("Failed");
 
       const data = await res.json();
 
       setPreferences(data.preferences || []);
+
+      // ✅ ADD THIS
+      setApplied(data.appliedUniversities || []);
+
     } catch (err) {
       console.error(err);
       alert("Failed to load applications");
@@ -102,6 +108,7 @@ const StudentApplications = () => {
       setLoading(false);
     }
   };
+
 
   const movePriority = async (from, to) => {
     try {
@@ -143,18 +150,55 @@ const StudentApplications = () => {
   return (
     <div className="min-h-screen bg-blue-50 p-4 sm:p-6 space-y-8">
 
-      {/* ================= STATUS ================= */}
+      {/* ================= APPLIED ================= */}
 
       <div className="bg-white p-6 rounded-xl shadow">
 
-        <h2 className="text-xl font-semibold mb-3 flex items-center gap-2 text-blue-700">
+        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-green-700">
           <CheckCircle size={22} />
-          Application Status
+          Applied Universities
         </h2>
 
-        <p className="text-gray-500">
-          No applications submitted yet.
-        </p>
+        {applied.length === 0 ? (
+
+          <p className="text-gray-500">
+            No applications submitted yet.
+          </p>
+
+        ) : (
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+            {applied.map((u) => (
+
+              <div
+                key={u._id}
+                className="bg-blue-50 p-4 rounded-lg border shadow-sm"
+              >
+
+                <h3 className="font-bold text-blue-800">
+                  {u.university?.name || "Unknown University"}
+                </h3>
+
+                <p className="text-sm text-gray-600 mt-1">
+                  {u.course}
+                </p>
+
+                <p className="text-xs text-gray-500 mt-1">
+                  {u.country}
+                </p>
+
+                <span className="inline-block mt-2 text-green-600 text-sm font-semibold">
+                   Applied
+                </span>
+
+              </div>
+
+            ))}
+
+          </div>
+
+        )}
 
       </div>
 
@@ -226,9 +270,17 @@ const StudentApplications = () => {
                 {/* CARD FOOTER */}
                 <div className="p-3 border-t bg-gray-50 flex justify-between items-center text-xs rounded-b-xl">
 
-                  <span className="text-gray-600">
-                    Priority #{i + 1}
+                  <span
+                    className={`font-semibold ${p.status === "preferred"
+                      ? "text-blue-600"
+                      : p.status === "interested"
+                        ? "text-orange-600"
+                        : "text-green-600"
+                      }`}
+                  >
+                    {p.status?.toUpperCase()}
                   </span>
+
 
                   <div className="flex gap-2">
 
@@ -261,8 +313,6 @@ const StudentApplications = () => {
         )}
 
       </div>
-
-      {/* ================= SUGGESTIONS ================= */}
 
       {/* ================= SUGGESTIONS ================= */}
 
@@ -360,6 +410,7 @@ const StudentApplications = () => {
         )}
       </div>
     </div>
+
   );
 };
 
