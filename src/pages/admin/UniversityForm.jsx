@@ -84,14 +84,14 @@ const UniversityForm = () => {
             console.log("DATA FROM API:", data);
 
             setForm({
-                universityName: data.universityName || "",
+                universityName: data.name || "",
                 country: data.country || "",
                 city: data.city || "",
                 partner: data.partner || false,
                 globalRanking: data.globalRanking || "",
                 globallyRecognized: data.globallyRecognized || false,
 
-                courseName: data.courseName || "",
+                courseName: data.course || "",
                 degree: data.degree || "",
                 stream: data.stream || "",
                 minPercentage: data.minPercentage || "",

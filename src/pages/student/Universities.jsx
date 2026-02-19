@@ -221,7 +221,7 @@ const Universities = () => {
           },
           body: JSON.stringify({
             universityId: uni._id,
-            course: uni.courseName,
+            course: uni.course,
           }),
         }
       );

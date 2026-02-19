@@ -43,27 +43,27 @@ export default function DocPreferences() {
   }, []);
 
   const handleStatusChange = async (prefId, status) => {
-  try {
-    const token = localStorage.getItem("docToken");
+    try {
+      const token = localStorage.getItem("docToken");
 
-    await axios.put(
-      "http://localhost:5000/api/application/preference/status",
-      { prefId, status },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+      await axios.put(
+        "http://localhost:5000/api/application/preference/status",
+        { prefId, status },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-    toast.success("Updated");
+      toast.success("Updated");
 
-    fetchPreferences();
+      fetchPreferences();
 
-  } catch (e) {
-    toast.error("Update failed");
-  }
-};
+    } catch (e) {
+      toast.error("Update failed");
+    }
+  };
 
   // ================= APPLY HANDLER =================
   const handleApply = async (suggestionId) => {
@@ -109,14 +109,16 @@ export default function DocPreferences() {
         </p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full border text-sm">
+          <table className="w-full border text-sm text-left">
 
             {/* ===== HEADER ===== */}
             <thead className="bg-blue-100 text-gray-700">
               <tr>
+                <th className="p-3 border">Enquiry ID</th>
                 <th className="p-3 border">Student</th>
                 <th className="p-3 border">University</th>
                 <th className="p-3 border">Course</th>
+                <th className="p-3 border">Country</th>
                 <th className="p-3 border">Status</th>
                 <th className="p-3 border">Visa</th>
                 <th className="p-3 border">Action</th>
@@ -125,33 +127,43 @@ export default function DocPreferences() {
 
             {/* ===== BODY ===== */}
             <tbody>
+
               {applications.map((app) =>
-                app.preferences?.map((pref) => (
-                  <tr key={pref._id} className="hover:bg-gray-50">
+                [
+                  ...(app.preferences || []),
+                  ...(app.executiveSuggestions || [])
+                ].map((pref) => (
+
+
+                  <tr
+                    key={pref._id}
+                    className="hover:bg-gray-50 transition"
+                  >
 
                     {/* Enquiry ID */}
                     <td className="p-3 border font-medium">
-                      {app.studentId?.enquiryId || "N/A"}
+                      {app.studentId?.studentEnquiryCode || "-"}
                     </td>
 
                     {/* Student */}
                     <td className="p-3 border">
-                      {app.studentId?.name || "N/A"}
+                      {app.studentId?.personalInfo?.firstName}{" "}
+                      {app.studentId?.personalInfo?.lastName}
                     </td>
 
-                    {/* University + Course */}
-                    <td className="p-3 border">
-                      <div className="font-semibold">
-                        {pref.university?.name}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {pref.course}
-                      </div>
+                    {/* University */}
+                    <td className="p-3 border font-semibold">
+                      {pref.university?.universityName || "-"}
+                    </td>
+
+                    {/* Course */}
+                    <td className="p-3 border text-gray-600">
+                      {pref.course || pref.university?.courseName || "-"}
                     </td>
 
                     {/* Country */}
                     <td className="p-3 border">
-                      {pref.country || pref.university?.country || "N/A"}
+                      {pref.university?.country || "-"}
                     </td>
 
                     {/* Status */}
@@ -162,7 +174,7 @@ export default function DocPreferences() {
                         onChange={(e) =>
                           handleStatusChange(pref._id, e.target.value)
                         }
-                        className="border rounded px-2 py-1 text-sm"
+                        className="border rounded px-2 py-1 text-sm bg-white"
                       >
 
                         <option value="preferred">Preferred</option>
@@ -175,37 +187,43 @@ export default function DocPreferences() {
                     </td>
 
                     {/* Visa */}
-                    <td className="p-3 border">
-                      {app.visaStatus}
+                    <td className="p-3 border text-gray-700">
+                      {app.visaStatus || "Pending"}
                     </td>
 
                     {/* Action */}
                     <td className="p-3 border text-center">
 
                       {pref.status === "applied" ? (
+
                         <button
                           onClick={() =>
                             navigate(`/docExecutive/applications/${app._id}`)
                           }
-                          className="text-blue-600 underline text-sm"
+                          className="text-blue-600 hover:underline text-sm font-medium"
                         >
                           View
                         </button>
+
                       ) : (
-                        <span className="text-gray-400 text-xs">
+
+                        <span className="text-gray-400">
                           —
                         </span>
+
                       )}
 
                     </td>
 
                   </tr>
+
                 ))
               )}
+
             </tbody>
 
-
           </table>
+
         </div>
       )}
     </div>

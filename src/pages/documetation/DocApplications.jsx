@@ -17,14 +17,14 @@ export default function DocApplications() {
         }
 
         const res = await axios.get(
-          "http://localhost:5000/api/application/interested",
+          "http://localhost:5000/api/application/assigned",
           {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           }
         );
-        console.log(applications);
+        console.log("FULL RESPONSE:", res.data);
 
         setApplications(res.data || []);
       } catch (err) {
@@ -119,8 +119,15 @@ export default function DocApplications() {
 
                       {/* Student */}
                       <td className="p-3 border font-semibold">
-                        {app.studentId?.name || "N/A"}
+                        <div>{app.studentId?.personalInfo?.firstName}{" "}
+                          {app.studentId?.personalInfo?.lastName}
+
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {app.studentId?.studentEnquiryCode || ""}
+                        </div>
                       </td>
+
 
                       {/* University */}
                       <td className="p-3 border">
@@ -128,9 +135,8 @@ export default function DocApplications() {
                       </td>
 
                       {/* Course */}
-                      <td className="p-3 border">
-                        {s.university?.course || "-"}
-                      </td>
+                      {s.course || "-"}
+
 
                       {/* App Status */}
                       <td className="p-3 border">

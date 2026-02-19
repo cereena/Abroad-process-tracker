@@ -177,11 +177,11 @@ const StudentApplications = () => {
               >
 
                 <h3 className="font-bold text-blue-800">
-                  {u.university?.name || "Unknown University"}
+                  {u.universityName || "Unknown University"}
                 </h3>
 
                 <p className="text-sm text-gray-600 mt-1">
-                  {u.course}
+                  {u.courseName}
                 </p>
 
                 <p className="text-xs text-gray-500 mt-1">
@@ -189,7 +189,7 @@ const StudentApplications = () => {
                 </p>
 
                 <span className="inline-block mt-2 text-green-600 text-sm font-semibold">
-                   Applied
+                  Applied
                 </span>
 
               </div>
@@ -364,8 +364,9 @@ const StudentApplications = () => {
 
                   <p className="flex items-center gap-2">
                     <BookOpen size={14} />
-                    {s.course || s.university?.courseName}
+                    {s.course || "N/A"}
                   </p>
+
 
                   <p className="flex items-center gap-2">
                     <Clock size={14} />

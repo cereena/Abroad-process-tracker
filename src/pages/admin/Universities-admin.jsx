@@ -196,7 +196,7 @@ useEffect(() => {
 
     const data = filtered.map((u, i) => ({
       "S.No": i + 1,
-      Name: u.universityName,
+      Name:u.universityName,
       Country: u.country,
       City: u.city,
       Course: u.courseName,
