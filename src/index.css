@@ -1,1 +1,10 @@
 @import "tailwindcss";
+
+/* index.css */
+@keyframes flash {
+  0%, 100% { background-color: transparent; }
+  50% { background-color: #fef08a; } /* yellow */
+}
+.animate-flash {
+  animation: flash 3s ease-in-out;
+}

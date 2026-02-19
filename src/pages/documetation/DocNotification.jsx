@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-
 export default function DocExecutiveNotifications() {
   const [notifications, setNotifications] = useState([]);
   const [error, setError] = useState("");
@@ -27,21 +26,17 @@ export default function DocExecutiveNotifications() {
           }
         );
 
-        //  Always normalize response
         setNotifications(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
         console.error("Notification fetch error:", err);
         setError("Unauthorized or forbidden");
-        setNotifications([]); // prevent crash
+        setNotifications([]);
       }
     };
 
     fetchNotifications();
   }, []);
 
-  if (error) {
-    return <p className="text-red-500">{error}</p>;
-  }
 
   const markAsRead = async (id) => {
     const token = localStorage.getItem("docToken");
@@ -53,7 +48,6 @@ export default function DocExecutiveNotifications() {
       },
     });
 
-    // Update UI instantly
     setNotifications((prev) =>
       prev.map((n) =>
         n._id === id ? { ...n, isRead: true } : n
@@ -61,6 +55,32 @@ export default function DocExecutiveNotifications() {
     );
   };
 
+  const goToInterestPage = async (note) => {
+    await markAsRead(note._id);
+
+    const highlightId = note.preferenceId?.toString();
+
+    if (note.suggestionId) {
+      sessionStorage.setItem("highlightId", note.suggestionId);
+    }
+
+    navigate("/docExecutive/preferences");
+  };
+
+  const goToDocuments = (note) => {
+    const sid = note.studentId?._id;
+
+    if (!sid) {
+      alert("Student ID missing!");
+      return;
+    }
+    markAsRead(note._id);
+    navigate(`/docExecutive/documents?student=${sid}`);
+  };
+
+  if (error) {
+    return <p className="text-red-500">{error}</p>;
+  }
 
   return (
     <div className="space-y-4">
@@ -70,84 +90,89 @@ export default function DocExecutiveNotifications() {
 
       {notifications.map((note) => {
         const student = note.studentId || {};
-        console.log("NOTE OBJECT:", note);
 
         return (
           <div
             key={note._id}
-            className={`bg-white p-4 rounded-lg shadow border-l-4 
-        ${note.isRead ? "border-gray-400" : "border-blue-600"}`}
+            className={`bg-white rounded-xl shadow-md border p-5 transition hover:shadow-lg
+            ${note.isRead ? "opacity-70" : ""}`}
           >
-            <h4 className="font-bold text-lg">{note.title}</h4>
-            <p className="text-gray-700">{note.message}</p>
-            {/* View Application button (for interest notifications) */}
-            {note.link && (
-              <button
-                onClick={() => {
-                  markAsRead(note._id);
-                  if (note.link?.startsWith("/docExecutive")) {
-                    navigate(note.link);
-                  } else {
-                    console.warn("Invalid link:", note.link);
-                  }
+            {/* Header */}
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="text-lg font-semibold text-blue-700">
+                  {student.name || "Student"}
+                </h3>
 
-                }}
-                className="mt-3 bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-500"
-              >
-                View Application
-              </button>
-            )}
+                <p className="text-sm text-gray-500">
+                  Enquiry ID:{" "}
+                  {note.enquiryId || student.studentEnquiryCode || "N/A"}
+                </p>
+              </div>
 
+              {!note.isRead && (
+                <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">
+                  New
+                </span>
+              )}
+            </div>
 
-            {/* Student info */}
-            {student._id && (
-              <div className="mt-2 text-sm text-gray-600 space-y-1">
+            {/* University Info */}
+            {(note.universityName || note.course || note.country) && (
+              <div className="mt-3 space-y-1 text-sm">
                 <p>
-                  <strong>Student:</strong> {student.name || "N/A"}
+                  <strong>University:</strong>{" "}
+                  {note.universityName || "N/A"}
                 </p>
 
-                {student.studentEnquiryCode && (
-                  <p>
-                    <strong>Enquiry ID:</strong>{" "}
-                    {student.studentEnquiryCode}
-                  </p>
-                )}
+                <p>
+                  <strong>Country:</strong> {note.country || "N/A"}
+                </p>
 
-                {student.email && (
-                  <p>
-                    <strong>Email:</strong> {student.email}
-                  </p>
-                )}
+                <p>
+                  <strong>Course:</strong> {note.course || "N/A"}
+                </p>
               </div>
             )}
 
-
-            {/* View button for document uploads */}
-            {note.title === "New Document Uploaded" && (
-              <button
-                className="mt-3 bg-blue-600 text-white px-3 py-1 rounded"
-                onClick={() => {
-                  const sid = note.studentId?._id;
-
-                  if (!sid) {
-                    alert("Student ID missing!");
-                    return;
-                  }
-                  markAsRead(note._id);
-                  navigate(`/docExecutive/documents?student=${sid}`);
-                }}
-              >
-                View Documents
-              </button>
+            {/* Student Email */}
+            {student.email && (
+              <p className="text-sm text-gray-600 mt-2">
+                <strong>Email:</strong> {student.email}
+              </p>
             )}
 
-            <small className="text-gray-400 block mt-3">
-              {new Date(note.createdAt).toLocaleString()}
-            </small>
+            {/* Actions */}
+            <div className="mt-4 flex justify-between items-center">
+              <span className="text-xs text-gray-400">
+                {new Date(note.createdAt).toLocaleString()}
+              </span>
+
+              <div className="flex gap-2">
+                {/* View Interest */}
+                {note.title === "Student Interested" && (
+                  <button
+                    onClick={() => goToInterestPage(note)}
+                    className="bg-green-600 hover:bg-green-500 text-white px-4 py-1.5 rounded-lg text-sm font-medium"
+                  >
+                    View Interest
+                  </button>
+                )}
+
+                {/* View Documents */}
+                {note.title === "New Document Uploaded" && (
+                  <button
+                    onClick={() => goToDocuments(note)}
+                    className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-1.5 rounded-lg text-sm font-medium"
+                  >
+                    View Documents
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
         );
       })}
-
     </div>
   );
 }

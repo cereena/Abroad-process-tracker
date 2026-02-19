@@ -262,7 +262,7 @@ const Universities = () => {
               setShowStudents(true);
             }}
             onFocus={() => setShowStudents(true)}
-            className="border p-2 rounded w-full"
+            className="border p-2 rounded w-full bg-white"
           />
 
           {/* Dropdown */}

@@ -47,3 +47,12 @@ body,
 .read-the-docs {
   color: #888;
 }
+
+/* global CSS */
+@keyframes flash {
+  0%, 100% { background-color: transparent; }
+  50% { background-color: #fef08a; }
+}
+.animate-flash {
+  animation: flash 3s ease-in-out;
+}

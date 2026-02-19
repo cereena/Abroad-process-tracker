@@ -112,54 +112,56 @@ export default function DocApplications() {
                 app.executiveSuggestions
                   ?.filter(s => s.interested)
                   .map(s => (
-                    <tr
-                      key={s._id}
-                      className="hover:bg-gray-50 text-sm"
-                    >
+                    <tr key={s._id} className="hover:bg-gray-50 text-sm">
 
-                      {/* Student */}
                       <td className="p-3 border font-semibold">
-                        <div>{app.studentId?.personalInfo?.firstName}{" "}
+                        <div>
+                          {app.studentId?.personalInfo?.firstName}{" "}
                           {app.studentId?.personalInfo?.lastName}
-
                         </div>
                         <div className="text-xs text-gray-500">
                           {app.studentId?.studentEnquiryCode || ""}
                         </div>
                       </td>
 
-
-                      {/* University */}
                       <td className="p-3 border">
-                        {s.university?.name || "N/A"}
+                        {s.university?.universityName || "N/A"}
                       </td>
 
-                      {/* Course */}
-                      {s.course || "-"}
+                      <td className="p-3 border">
+                        {s.course || "-"}
+                      </td>
 
-
-                      {/* App Status */}
                       <td className="p-3 border">
                         <StatusBadge value={app.applicationStatus} />
                       </td>
 
-                      {/* Visa */}
                       <td className="p-3 border">
                         <StatusBadge value={app.visaStatus} />
                       </td>
 
-                      {/* Action */}
                       <td className="p-3 border">
-                        <button
-                          className="px-3 py-1 bg-green-600 text-white rounded text-xs"
-                          onClick={() => handleApply(s._id)}
+                        <select
+                          value={app.applicationStatus}
+                          onChange={(e) =>
+                            updateApplicationStatus(app._id, e.target.value)
+                          }
                         >
-                          Apply
-                        </button>
+                          <option value="Pending">Pending</option>
+                          <option value="Applied">Applied</option>
+                          <option value="Offer_Received">Offer Received</option>
+                          <option value="Acceptance_Received">Acceptance Letter</option>
+                          <option value="Fee_Paid">Fee Paid</option>
+                          <option value="Visa_Submitted">Visa Submitted</option>
+                          <option value="Visa_Approved">Visa Approved</option>
+                          <option value="Visa_Rejected">Visa Rejected</option>
+                          <option value="Student_Rejected">Student Rejected</option>
+                        </select>
 
                       </td>
 
                     </tr>
+
                   ))
               )}
             </tbody>

@@ -11,12 +11,12 @@ import {
 const StudentApplications = () => {
 
 
-  const markInterested = async (id) => {
+  const markInterested = async (s) => { // pass the whole suggestion
     try {
       const token = localStorage.getItem("token");
 
       const res = await fetch(
-        `http://localhost:5000/api/application/interested/${id}`,
+        `http://localhost:5000/api/application/interested/${s._id}`,
         {
           method: "PUT",
           headers: {
@@ -31,11 +31,31 @@ const StudentApplications = () => {
 
       alert("Interest sent ✅");
 
-      fetchSuggestions(); // refresh UI
+      // Add to preferences table locally
+      setPreferences((prev) => {
+        const exists = prev.find(
+          (p) => p.university._id === s.university._id
+        );
+        if (exists) return prev;
+
+        return [
+          ...prev,
+          {
+            _id: s._id,
+            university: s.university,
+            course: s.course || s.university?.courseName,
+            status: "interested",
+          },
+        ];
+      });
+
+      // Refresh suggestions if needed
+      fetchSuggestions();
     } catch (err) {
       alert(err.message || "Failed");
     }
   };
+
 
   /* ================= STATE ================= */
   const [suggestions, setSuggestions] = useState([]);
@@ -396,7 +416,7 @@ const StudentApplications = () => {
                   {/* Button */}
                   {!s.interested && (
                     <button
-                      onClick={() => markInterested(s._id)}
+                      onClick={() => markInterested(s)}
                       className="px-3 py-1 bg-orange-500 text-white rounded hover:bg-orange-400 text-xs"
                     >
                       I'm Interested

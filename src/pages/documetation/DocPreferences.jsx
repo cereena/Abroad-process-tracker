@@ -6,6 +6,8 @@ import { toast } from "react-toastify";
 export default function DocPreferences() {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [highlightedRow, setHighlightedRow] = useState(null);
+
 
   const navigate = useNavigate();
 
@@ -13,7 +15,6 @@ export default function DocPreferences() {
   const fetchPreferences = async () => {
     try {
       const token = localStorage.getItem("docToken");
-
       if (!token) {
         toast.error("Session expired. Login again.");
         navigate("/login");
@@ -42,7 +43,25 @@ export default function DocPreferences() {
     fetchPreferences();
   }, []);
 
+
+  // ================= HIGHLIGHT HANDLER =================
+  useEffect(() => {
+    if (loading || applications.length === 0) return;
+
+    const highlightId = sessionStorage.getItem("highlightId");
+    if (!highlightId) return;
+
+    setHighlightedRow(highlightId);
+
+    setTimeout(() => {
+      setHighlightedRow(null);
+      sessionStorage.removeItem("highlightId");
+    }, 3000);
+  }, [applications, loading]);
+
+  // ================= STATUS CHANGE =================
   const handleStatusChange = async (prefId, status) => {
+    
     try {
       const token = localStorage.getItem("docToken");
 
@@ -50,16 +69,12 @@ export default function DocPreferences() {
         "http://localhost:5000/api/application/preference/status",
         { prefId, status },
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
       toast.success("Updated");
-
       fetchPreferences();
-
     } catch (e) {
       toast.error("Update failed");
     }
@@ -74,22 +89,17 @@ export default function DocPreferences() {
         "http://localhost:5000/api/application/apply",
         { suggestionId },
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
       toast.success("Applied successfully");
-
       fetchPreferences();
-
     } catch (err) {
       console.error(err);
       toast.error("Apply failed");
     }
   };
-
 
   // ================= UI =================
   if (loading) {
@@ -98,19 +108,15 @@ export default function DocPreferences() {
 
   return (
     <div className="bg-white rounded-xl shadow p-6">
-
       <h2 className="text-xl font-semibold mb-5">
         Student Preferences & Applications
       </h2>
 
       {applications.length === 0 ? (
-        <p className="text-gray-500 text-center py-10">
-          No applications found
-        </p>
+        <p className="text-gray-500 text-center py-10">No applications found</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full border text-sm text-left">
-
             {/* ===== HEADER ===== */}
             <thead className="bg-blue-100 text-gray-700">
               <tr>
@@ -127,103 +133,79 @@ export default function DocPreferences() {
 
             {/* ===== BODY ===== */}
             <tbody>
-
               {applications.map((app) =>
                 [
-                  ...(app.preferences || []),
-                  ...(app.executiveSuggestions || [])
-                ].map((pref) => (
+                  ...(app.preferences || []).map(p => ({ ...p, type: "preference" })),
+                  ...(app.executiveSuggestions || []).map(p => ({ ...p, type: "suggestion" }))
+                ].map((pref) => {
 
+                  return (
+                    <tr
+                      key={pref._id}
+                      className={`hover:bg-gray-50 transition ${highlightedRow === pref._id.toString() && pref.type === "suggestion"
+                        ? "bg-yellow-200 ring-2 ring-yellow-400"
+                        : ""
+                        }`}>
 
-                  <tr
-                    key={pref._id}
-                    className="hover:bg-gray-50 transition"
-                  >
-
-                    {/* Enquiry ID */}
-                    <td className="p-3 border font-medium">
-                      {app.studentId?.studentEnquiryCode || "-"}
-                    </td>
-
-                    {/* Student */}
-                    <td className="p-3 border">
-                      {app.studentId?.personalInfo?.firstName}{" "}
-                      {app.studentId?.personalInfo?.lastName}
-                    </td>
-
-                    {/* University */}
-                    <td className="p-3 border font-semibold">
-                      {pref.university?.universityName || "-"}
-                    </td>
-
-                    {/* Course */}
-                    <td className="p-3 border text-gray-600">
-                      {pref.course || pref.university?.courseName || "-"}
-                    </td>
-
-                    {/* Country */}
-                    <td className="p-3 border">
-                      {pref.university?.country || "-"}
-                    </td>
-
-                    {/* Status */}
-                    <td className="p-3 border">
-
-                      <select
-                        value={pref.status}
-                        onChange={(e) =>
-                          handleStatusChange(pref._id, e.target.value)
-                        }
-                        className="border rounded px-2 py-1 text-sm bg-white"
-                      >
-
-                        <option value="preferred">Preferred</option>
-                        <option value="interested">Interested</option>
-                        <option value="applied">Applied</option>
-                        <option value="not_eligible">Not Eligible</option>
-
-                      </select>
-
-                    </td>
-
-                    {/* Visa */}
-                    <td className="p-3 border text-gray-700">
-                      {app.visaStatus || "Pending"}
-                    </td>
-
-                    {/* Action */}
-                    <td className="p-3 border text-center">
-
-                      {pref.status === "applied" ? (
-
-                        <button
-                          onClick={() =>
-                            navigate(`/docExecutive/applications/${app._id}`)
+                      <td className="p-3 border font-medium">
+                        {app.studentId?.studentEnquiryCode || "-"}
+                      </td>
+                      <td className="p-3 border">
+                        {app.studentId?.personalInfo?.firstName}{" "}
+                        {app.studentId?.personalInfo?.lastName}
+                      </td>
+                      <td className="p-3 border font-semibold">
+                        {pref.university?.universityName || "-"}
+                      </td>
+                      <td className="p-3 border text-gray-600">
+                        {pref.course || pref.university?.courseName || "-"}
+                      </td>
+                      <td className="p-3 border">
+                        {pref.university?.country || "-"}
+                      </td>
+                      <td className="p-3 border">
+                        <select
+                          disabled={pref.type === "suggestion"}
+                          value={
+                            pref.status === "pending" ? "interested" : pref.status
                           }
-                          className="text-blue-600 hover:underline text-sm font-medium"
+                          onChange={(e) =>
+                            handleStatusChange(pref._id, e.target.value)
+                          }
+                          className="border rounded px-2 py-1 text-sm bg-white"
                         >
-                          View
-                        </button>
 
-                      ) : (
+                          <option value="preferred">Preferred</option>
+                          <option value="interested">Interested</option>
+                          <option value="applied">Applied</option>
+                          <option value="not_eligible">Not Eligible</option>
+                        </select>
+                      </td>
+                      <td className="p-3 border text-gray-700">
+                        {app.visaStatus || "Pending"}
+                      </td>
+                      <td className="p-3 border text-center">
+                        {pref.status === "applied" ? (
+                          <button
+                            onClick={() =>
+                              navigate(`/docExecutive/applications/`)
+                            }
+                            className="text-blue-600 hover:underline text-sm font-medium"
+                          >
+                            View
+                          </button>
+                        ) : (
+                          <span className="text-gray-400">—</span>
+                        )}
+                      </td>
 
-                        <span className="text-gray-400">
-                          —
-                        </span>
-
-                      )}
-
-                    </td>
-
-                  </tr>
-
-                ))
+                    </tr>
+                  );
+                })
               )}
 
             </tbody>
-
           </table>
-
         </div>
       )}
     </div>
