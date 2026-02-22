@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -7,7 +8,6 @@ export default function DocPreferences() {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [highlightedRow, setHighlightedRow] = useState(null);
-
 
   const navigate = useNavigate();
 
@@ -60,22 +60,31 @@ export default function DocPreferences() {
   }, [applications, loading]);
 
   // ================= STATUS CHANGE =================
-  const handleStatusChange = async (prefId, status) => {
-    
+  const handleStatusChange = async (pref, status) => {
     try {
       const token = localStorage.getItem("docToken");
+      if (!token) return toast.error("Session expired");
+
+      if (pref.source !== "preference") {
+        toast.info("Status can only be changed after student interest");
+        return;
+      }
+
+      if (status === "interested") {
+        toast.info("Use Apply button instead");
+        return;
+      }
 
       await axios.put(
         "http://localhost:5000/api/application/preference/status",
-        { prefId, status },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { prefId: pref._id, status },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       toast.success("Updated");
       fetchPreferences();
     } catch (e) {
+      console.error(e.response?.data || e.message);
       toast.error("Update failed");
     }
   };
@@ -84,23 +93,46 @@ export default function DocPreferences() {
   const handleApply = async (suggestionId) => {
     try {
       const token = localStorage.getItem("docToken");
+      if (!token) return toast.error("Session expired");
 
       await axios.post(
         "http://localhost:5000/api/application/apply",
         { suggestionId },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       toast.success("Applied successfully");
       fetchPreferences();
     } catch (err) {
-      console.error(err);
+      console.error(err.response?.data || err.message);
       toast.error("Apply failed");
     }
   };
 
+  const handleReject = async (prefId) => {
+    try {
+      const token = localStorage.getItem("docToken");
+
+      await axios.put(
+        "http://localhost:5000/api/application/preference/status",
+        { prefId, status: "not_eligible" },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      toast.success("Rejected");
+      fetchPreferences();
+    } catch (err) {
+      toast.error("Reject failed");
+    }
+  };
+
+  const token = localStorage.getItem("docToken");
+  let currentDocExecutiveId = null;
+  if (token) {
+    // Assuming JWT contains the executive ID
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    currentDocExecutiveId = payload.id; // or whatever your JWT stores
+  }
   // ================= UI =================
   if (loading) {
     return <p className="text-center mt-10">Loading...</p>;
@@ -133,20 +165,35 @@ export default function DocPreferences() {
 
             {/* ===== BODY ===== */}
             <tbody>
-              {applications.map((app) =>
-                [
-                  ...(app.preferences || []).map(p => ({ ...p, type: "preference" })),
-                  ...(app.executiveSuggestions || []).map(p => ({ ...p, type: "suggestion" }))
-                ].map((pref) => {
+              {applications.map((app) => {
+                // Merge preferences + executiveSuggestions, filter nulls
+                const allApplications = [
+                  ...(app.preferences || []).map(p => ({
+                    ...p,
+                    source: "preference",
+                    suggestionId: p.suggestionId || null,
+                  })),
+                  ...(app.executiveSuggestions || [])
+                    .filter(Boolean)
+                    .map(s => ({
+                      ...s,
+                      source: "suggestion",
+                      suggestionId: s._id,
+                    })),
+                ];
+
+                // Map and return JSX directly
+                return allApplications.map((pref) => {
+                  if (!pref) return null; // extra safety
 
                   return (
                     <tr
                       key={pref._id}
-                      className={`hover:bg-gray-50 transition ${highlightedRow === pref._id.toString() && pref.type === "suggestion"
+                      className={`hover:bg-gray-50 transition ${highlightedRow === pref._id.toString() && pref.source === "suggestion"
                         ? "bg-yellow-200 ring-2 ring-yellow-400"
                         : ""
-                        }`}>
-
+                        }`}
+                    >
                       <td className="p-3 border font-medium">
                         {app.studentId?.studentEnquiryCode || "-"}
                       </td>
@@ -160,54 +207,68 @@ export default function DocPreferences() {
                       <td className="p-3 border text-gray-600">
                         {pref.course || pref.university?.courseName || "-"}
                       </td>
-                      <td className="p-3 border">
-                        {pref.university?.country || "-"}
-                      </td>
+                      <td className="p-3 border">{pref.university?.country || "-"}</td>
                       <td className="p-3 border">
                         <select
-                          disabled={pref.type === "suggestion"}
-                          value={
-                            pref.status === "pending" ? "interested" : pref.status
-                          }
-                          onChange={(e) =>
-                            handleStatusChange(pref._id, e.target.value)
-                          }
+                          value={pref.status || "pending"}
+                          onChange={(e) => handleStatusChange(pref, e.target.value)}
                           className="border rounded px-2 py-1 text-sm bg-white"
                         >
-
+                          <option value="suggested">Suggested</option>
                           <option value="preferred">Preferred</option>
                           <option value="interested">Interested</option>
                           <option value="applied">Applied</option>
                           <option value="not_eligible">Not Eligible</option>
                         </select>
                       </td>
-                      <td className="p-3 border text-gray-700">
-                        {app.visaStatus || "Pending"}
-                      </td>
+                      <td className="p-3 border text-gray-700">{app.visaStatus || "Pending"}</td>
                       <td className="p-3 border text-center">
-                        {pref.status === "applied" ? (
+                        {/* APPLY BUTTON */}
+                        {pref.source === "suggestion" &&
+                          ["suggested", "preferred", "interested"].includes(pref.status) && (
+                            <button
+                              onClick={() =>
+                                handleApply(
+                                  pref.source === "suggestion"
+                                    ? pref._id
+                                    : pref.suggestionId
+                                )
+                              }
+                              className="px-3 py-1 bg-green-500 text-white rounded text-sm mr-2"
+                            >
+                              Apply
+                            </button>
+                          )}
+
+                        {/* REJECT BUTTON (only for preference items) */}
+                        {pref.source === "preference" && pref.status === "preferred" && (
                           <button
-                            onClick={() =>
-                              navigate(`/docExecutive/applications/`)
-                            }
-                            className="text-blue-600 hover:underline text-sm font-medium"
+                            onClick={() => handleReject(pref._id)}
+                            className="px-3 py-1 bg-red-500 text-white rounded text-sm"
                           >
-                            View
+                            Reject
                           </button>
-                        ) : (
-                          <span className="text-gray-400">—</span>
+                        )}
+
+                        {/* APPLIED STATUS */}
+                        {pref.status === "applied" && (
+                          <span className="text-blue-600 font-medium">Applied</span>
+                        )}
+
+                        {/* REJECTED STATUS */}
+                        {pref.status === "not_eligible" && (
+                          <span className="text-gray-400">Rejected</span>
                         )}
                       </td>
-
                     </tr>
                   );
-                })
-              )}
-
+                });
+              })}
             </tbody>
           </table>
         </div>
-      )}
-    </div>
+      )
+      }
+    </div >
   );
 }

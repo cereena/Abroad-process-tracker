@@ -31,6 +31,8 @@ const Contact = () => {
         }),
       });
 
+      const data = await res.json();
+
       if (res.ok) {
         alert("Your request has been sent. Our expert will contact you.");
         setFormData({
@@ -41,7 +43,7 @@ const Contact = () => {
           message: "",
         });
       } else {
-        alert("Something went wrong");
+        alert(data.message || "Something went wrong");
       }
     } catch (err) {
       console.error(err);

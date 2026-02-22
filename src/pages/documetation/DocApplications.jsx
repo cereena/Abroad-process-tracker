@@ -6,35 +6,35 @@ export default function DocApplications() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    const fetchApplications = async () => {
-      try {
-        const token = localStorage.getItem("docToken");
+  const fetchApplications = async () => {
+    try {
+      const token = localStorage.getItem("docToken");
 
-        if (!token) {
-          setError("Login required");
-          return;
-        }
-
-        const res = await axios.get(
-          "http://localhost:5000/api/application/assigned",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        console.log("FULL RESPONSE:", res.data);
-
-        setApplications(res.data || []);
-      } catch (err) {
-        console.error(err);
-        setError("Failed to load applications");
-      } finally {
-        setLoading(false);
+      if (!token) {
+        setError("Login required");
+        return;
       }
-    };
 
+      const res = await axios.get(
+        "http://localhost:5000/api/application/assigned",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log("FULL RESPONSE:", res.data);
+
+      setApplications(res.data || []);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load applications");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchApplications();
   }, []);
 
@@ -53,10 +53,31 @@ export default function DocApplications() {
       );
 
       alert("Applied Successfully");
-      window.location.reload();
+      fetchApplications();
 
     } catch {
       alert("Apply failed");
+    }
+  };
+  const updateProgress = async (appId, status) => {
+    try {
+      const token = localStorage.getItem("docToken");
+
+      await axios.put(
+        "http://localhost:5000/api/application/progress",
+        { appId, status },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      alert("Status updated");
+      window.location.reload();
+    } catch (error) {
+      console.error(error);
+      alert("Failed to update status");
     }
   };
 
@@ -103,7 +124,6 @@ export default function DocApplications() {
                 <th className="p-3 border">Course</th>
                 <th className="p-3 border">Status</th>
                 <th className="p-3 border">Visa</th>
-                <th className="p-3 border">Action</th>
               </tr>
             </thead>
 
@@ -133,18 +153,10 @@ export default function DocApplications() {
                       </td>
 
                       <td className="p-3 border">
-                        <StatusBadge value={app.applicationStatus} />
-                      </td>
-
-                      <td className="p-3 border">
-                        <StatusBadge value={app.visaStatus} />
-                      </td>
-
-                      <td className="p-3 border">
                         <select
-                          value={app.applicationStatus}
+                          value={s.applicationStatus}
                           onChange={(e) =>
-                            updateApplicationStatus(app._id, e.target.value)
+                            updateProgress(app._id, e.target.value)
                           }
                         >
                           <option value="Pending">Pending</option>
@@ -158,6 +170,10 @@ export default function DocApplications() {
                           <option value="Student_Rejected">Student Rejected</option>
                         </select>
 
+                      </td>
+
+                      <td className="p-3 border">
+                        <StatusBadge value={app.visaStatus} />
                       </td>
 
                     </tr>

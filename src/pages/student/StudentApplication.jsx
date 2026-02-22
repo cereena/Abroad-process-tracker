@@ -7,52 +7,59 @@ import {
   CheckCircle,
   Star,
 } from "lucide-react";
+import { toast } from 'react-toastify';
 
 const StudentApplications = () => {
 
 
-  const markInterested = async (s) => { // pass the whole suggestion
+  // On student side
+  const markInterested = async (prefId, courseChosen) => {
+    const token = localStorage.getItem("token");
     try {
-      const token = localStorage.getItem("token");
-
       const res = await fetch(
-        `http://localhost:5000/api/application/interested/${s._id}`,
+        `http://localhost:5000/api/application/interested/${prefId}`,
         {
           method: "PUT",
           headers: {
+            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        }
+          body: JSON.stringify({ course: courseChosen }),
+        });
+
+      let data = {};
+      try {
+        data = await res.json(); // try parse JSON
+      } catch (err) {
+        data = {}; // fallback to empty object if not JSON
+      }
+
+      if (!res.ok) throw new Error(data.message || "Failed to mark interest");
+
+      toast.success('Interest saved!', {
+        style: { border: '1px solid #10b981', padding: '16px', color: '#065f46', fontWeight: 'bold' },
+        iconTheme: { primary: '#10b981', secondary: '#FFFAEE' }
+      });
+
+      // update suggestions UI
+      setSuggestions(prev =>
+        prev.map(s =>
+          s._id === prefId ? { ...s, interested: true } : s
+        )
       );
 
-      const data = await res.json();
-
-      if (!res.ok) throw new Error(data.message);
-
-      alert("Interest sent ✅");
-
-      // Add to preferences table locally
-      setPreferences((prev) => {
-        const exists = prev.find(
-          (p) => p.university._id === s.university._id
-        );
+      setPreferences(prev => {
+        const exists = prev.find(p => p._id === prefId);
         if (exists) return prev;
 
         return [
           ...prev,
-          {
-            _id: s._id,
-            university: s.university,
-            course: s.course || s.university?.courseName,
-            status: "interested",
-          },
+          { _id: prefId, course: courseChosen, status: "interested" }
         ];
       });
 
-      // Refresh suggestions if needed
-      fetchSuggestions();
     } catch (err) {
-      alert(err.message || "Failed");
+      alert(err.message || "Failed to mark interest");
     }
   };
 
@@ -117,8 +124,6 @@ const StudentApplications = () => {
       const data = await res.json();
 
       setPreferences(data.preferences || []);
-
-      // ✅ ADD THIS
       setApplied(data.appliedUniversities || []);
 
     } catch (err) {
@@ -188,36 +193,29 @@ const StudentApplications = () => {
         ) : (
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-
             {applied.map((u) => (
-
               <div
                 key={u._id}
                 className="bg-blue-50 p-4 rounded-lg border shadow-sm"
               >
-
                 <h3 className="font-bold text-blue-800">
-                  {u.universityName || "Unknown University"}
+                  {u.university?.universityName || "Unknown University"}
                 </h3>
-
                 <p className="text-sm text-gray-600 mt-1">
-                  {u.courseName}
+                  {u.course || "Unknown Course"}
                 </p>
-
                 <p className="text-xs text-gray-500 mt-1">
-                  {u.country}
+                  {u.university?.country || u.country || "N/A"}
                 </p>
-
+                <p className="text-xs text-gray-500 mt-1">
+                  Intake: {u.university?.intakes?.join(", ") || "N/A"}
+                </p>
                 <span className="inline-block mt-2 text-green-600 text-sm font-semibold">
                   Applied
                 </span>
-
               </div>
-
             ))}
-
           </div>
-
         )}
 
       </div>
@@ -416,7 +414,7 @@ const StudentApplications = () => {
                   {/* Button */}
                   {!s.interested && (
                     <button
-                      onClick={() => markInterested(s)}
+                      onClick={() => markInterested(s._id, s.course)}
                       className="px-3 py-1 bg-orange-500 text-white rounded hover:bg-orange-400 text-xs"
                     >
                       I'm Interested

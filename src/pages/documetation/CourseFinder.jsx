@@ -50,7 +50,7 @@ const Universities = () => {
   /* ================= AUTH CHECK ================= */
 
   const checkAuth = () => {
-    const token = getToken();
+    const token = localStorage.getItem("docToken");
 
     if (!token) {
       alert("Session expired. Login again.");
@@ -140,55 +140,60 @@ const Universities = () => {
   useEffect(() => {
     let temp = [...universities];
 
+    // SEARCH
     if (search) {
       temp = temp.filter((u) =>
-        u.universityName
-          .toLowerCase()
-          .includes(search.toLowerCase())
+        u.universityName?.toLowerCase().includes(search.toLowerCase())
       );
     }
 
+    // COUNTRY
     if (filters.country) {
-      temp = temp.filter(
-        (u) => u.country === filters.country
+      temp = temp.filter((u) =>
+        u.country?.toLowerCase().includes(filters.country.toLowerCase())
       );
     }
 
+    // MAX BUDGET
     if (filters.maxBudget) {
       temp = temp.filter(
-        (u) =>
-          u.tuitionFee <= Number(filters.maxBudget)
+        (u) => u.tuitionFee && Number(u.tuitionFee) <= Number(filters.maxBudget)
       );
     }
 
+    // MIN PERCENTAGE
     if (filters.minPercentage) {
       temp = temp.filter(
         (u) =>
-          u.minPercentage >=
-          Number(filters.minPercentage)
+          u.minPercentage &&
+          Number(u.minPercentage) >= Number(filters.minPercentage)
       );
     }
 
+    // STREAM
     if (filters.stream) {
-      temp = temp.filter(
-        (u) => u.stream === filters.stream
+      temp = temp.filter((u) =>
+        u.stream?.toLowerCase().includes(filters.stream.toLowerCase())
       );
     }
 
+    // INTAKE
     if (filters.intake) {
       temp = temp.filter((u) =>
-        u.intakes?.includes(filters.intake)
+        u.intakes?.some((i) =>
+          i.toLowerCase().includes(filters.intake.toLowerCase())
+        )
       );
     }
 
+    console.log("Filtered:", temp);
     setFiltered(temp);
     setPage(1);
   }, [filters, search, universities]);
-
   /* ================= ACTION ================= */
 
   const handleSuggest = async (uni) => {
-    console.log("CLICKED", uni._id);
+
     try {
       if (!selectedStudent) {
         alert("Select student first");
@@ -206,11 +211,11 @@ const Universities = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
+
           body: JSON.stringify({
             universityId: uni._id,
             course: uni.stream || uni.courseName,
           }),
-
         }
       );
 
@@ -225,6 +230,7 @@ const Universities = () => {
     }
   };
 
+  console.log(universities);
 
   /* ================= PAGINATION ================= */
 
