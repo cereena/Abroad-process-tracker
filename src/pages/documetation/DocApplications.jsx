@@ -154,7 +154,7 @@ export default function DocApplications() {
 
                       <td className="p-3 border">
                         <select
-                          value={s.applicationStatus}
+                          value={app.applicationStatus}
                           onChange={(e) =>
                             updateProgress(app._id, e.target.value)
                           }
