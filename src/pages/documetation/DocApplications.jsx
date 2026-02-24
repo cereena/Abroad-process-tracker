@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { UploadCloud } from "lucide-react";
 
 export default function DocApplications() {
   const [applications, setApplications] = useState([]);
@@ -106,7 +107,7 @@ export default function DocApplications() {
   /* ================= TABLE ================= */
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 bg-blue-50 min-h-screen">
       {/* HEADER */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold">University Applications</h2>
@@ -165,7 +166,7 @@ export default function DocApplications() {
 
                     <td className="p-3 border">
                       <select
-                        value={app.applicationStatus}
+                        value={applied.status}
                         onChange={(e) =>
                           updateProgress(app._id, e.target.value)
                         }
@@ -181,8 +182,34 @@ export default function DocApplications() {
                     </td>
 
                     <td className="p-3 border">
-                      {app.applicationStatus === "Offer Received" && (
-                        <UploadOfferLetter appId={app._id} />
+                      {applied.status === "Applied" && (
+                        <UploadOfferLetter appId={app._id} universityId={applied._id} />
+                      )}
+
+                      {applied.status === "Offer Received" && applied.offerLetter?.url && (
+                        <a
+                          href={applied.offerLetter.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-blue-600 font-semibold hover:underline"
+                        >
+                          View Offer Letter
+                        </a>
+                      )}
+
+                      {applied.status === "Fee Paid" && (
+                        <UploadAcceptanceLetter appId={app._id} universityId={applied._id} />
+                      )}
+
+                      {applied.status === "Acceptance Letter" && applied.acceptanceLetter?.url && (
+                        <a
+                          href={applied.acceptanceLetter.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-green-600 font-semibold hover:underline"
+                        >
+                          View Acceptance Letter
+                        </a>
                       )}
                     </td>
 
@@ -263,7 +290,11 @@ function UploadOfferLetter({ appId }) {
   };
 
   return (
-    <input type="file" onChange={uploadFile} />
+    <label className="group inline-flex items-center gap-1.5 cursor-pointer bg-white border border-blue-600 hover:border-blue-500 hover:bg-blue-50 text-blue-700 hover:text-blue-600 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-all active:scale-95">
+    <UploadCloud size={14} className="text-blue-600 group-hover:text-blue-600 transition-colors" />
+    <span>Upload Offer</span>
+    <input type="file" onChange={uploadFile} className="hidden" />
+  </label>
   );
 }
 
@@ -294,5 +325,11 @@ function UploadAcceptanceLetter({ appId }) {
     }
   };
 
-  return <input type="file" onChange={uploadFile} />;
+  return (
+    <label className="group inline-flex items-center gap-1.5 cursor-pointer bg-white border border-blue-600 hover:border-blue-500 hover:bg-blue-50 text-blue-700 hover:text-blue-600 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-all active:scale-95">
+    <UploadCloud size={14} className="text-blue-600 group-hover:text-blue-600 transition-colors" />
+    <span>Upload Acceptance</span>
+    <input type="file" onChange={uploadFile} className="hidden" />
+  </label>
+  );
 }
