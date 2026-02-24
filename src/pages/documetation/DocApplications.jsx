@@ -81,6 +81,18 @@ export default function DocApplications() {
     }
   };
 
+  const STATUS = [
+    "Pending",
+    "Applied",
+    "Offer Received",
+    "Acceptance Letter",
+    "Fee Paid",
+    "Visa Submitted",
+    "Visa Approved",
+    "Visa Rejected",
+    "University Rejected"
+  ];
+
   /* ================= STATES ================= */
 
   if (loading) {
@@ -124,61 +136,58 @@ export default function DocApplications() {
                 <th className="p-3 border">Course</th>
                 <th className="p-3 border">Status</th>
                 <th className="p-3 border">Visa</th>
+                <th className="p-3 border">Documents</th>
               </tr>
             </thead>
 
             <tbody>
               {applications.map(app =>
-                app.executiveSuggestions
-                  ?.filter(s => s.interested)
-                  .map(s => (
-                    <tr key={s._id} className="hover:bg-gray-50 text-sm">
+                app.appliedUniversities?.map(applied => (
+                  <tr key={applied._id} className="hover:bg-gray-50 text-sm">
 
-                      <td className="p-3 border font-semibold">
-                        <div>
-                          {app.studentId?.personalInfo?.firstName}{" "}
-                          {app.studentId?.personalInfo?.lastName}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {app.studentId?.studentEnquiryCode || ""}
-                        </div>
-                      </td>
+                    <td className="p-3 border font-semibold">
+                      <div>
+                        {app.studentId?.personalInfo?.firstName}{" "}
+                        {app.studentId?.personalInfo?.lastName}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {app.studentId?.studentEnquiryCode || ""}
+                      </div>
+                    </td>
 
-                      <td className="p-3 border">
-                        {s.university?.universityName || "N/A"}
-                      </td>
+                    <td className="p-3 border">
+                      {applied.university?.universityName || "N/A"}
+                    </td>
 
-                      <td className="p-3 border">
-                        {s.course || "-"}
-                      </td>
+                    <td className="p-3 border">
+                      {applied.course || "-"}
+                    </td>
 
-                      <td className="p-3 border">
-                        <select
-                          value={app.applicationStatus}
-                          onChange={(e) =>
-                            updateProgress(app._id, e.target.value)
-                          }
-                        >
-                          <option value="Pending">Pending</option>
-                          <option value="Applied">Applied</option>
-                          <option value="Offer_Received">Offer Received</option>
-                          <option value="Acceptance_Received">Acceptance Letter</option>
-                          <option value="Fee_Paid">Fee Paid</option>
-                          <option value="Visa_Submitted">Visa Submitted</option>
-                          <option value="Visa_Approved">Visa Approved</option>
-                          <option value="Visa_Rejected">Visa Rejected</option>
-                          <option value="Student_Rejected">Student Rejected</option>
-                        </select>
+                    <td className="p-3 border">
+                      <select
+                        value={app.applicationStatus}
+                        onChange={(e) =>
+                          updateProgress(app._id, e.target.value)
+                        }
+                      >
+                        {STATUS.map(s => (
+                          <option key={s} value={s}>{s}</option>
+                        ))}
+                      </select>
+                    </td>
 
-                      </td>
+                    <td className="p-3 border">
+                      <StatusBadge value={app.visaStatus} />
+                    </td>
 
-                      <td className="p-3 border">
-                        <StatusBadge value={app.visaStatus} />
-                      </td>
+                    <td className="p-3 border">
+                      {app.applicationStatus === "Offer Received" && (
+                        <UploadOfferLetter appId={app._id} />
+                      )}
+                    </td>
 
-                    </tr>
-
-                  ))
+                  </tr>
+                ))
               )}
             </tbody>
 
@@ -224,4 +233,66 @@ function StatusBadge({ value }) {
       {value}
     </span>
   );
+}
+
+function UploadOfferLetter({ appId }) {
+  const uploadFile = async (e) => {
+    const file = e.target.files[0];
+    const token = localStorage.getItem("docToken");
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("appId", appId);
+
+    try {
+      await axios.post(
+        "http://localhost:5000/api/application/upload-offer",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      alert("Offer Letter Uploaded");
+    } catch (err) {
+      alert("Upload failed");
+    }
+  };
+
+  return (
+    <input type="file" onChange={uploadFile} />
+  );
+}
+
+function UploadAcceptanceLetter({ appId }) {
+  const uploadFile = async (e) => {
+    const file = e.target.files[0];
+    const token = localStorage.getItem("docToken");
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("appId", appId);
+
+    try {
+      await axios.post(
+        "http://localhost:5000/api/application/upload-acceptance",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      alert("Acceptance Letter Uploaded");
+    } catch {
+      alert("Upload failed");
+    }
+  };
+
+  return <input type="file" onChange={uploadFile} />;
 }

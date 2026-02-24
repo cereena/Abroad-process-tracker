@@ -90,14 +90,14 @@ export default function DocPreferences() {
   };
 
   // ================= APPLY HANDLER =================
-  const handleApply = async (suggestionId) => {
+  const handleApply = async (prefId) => {
     try {
       const token = localStorage.getItem("docToken");
       if (!token) return toast.error("Session expired");
 
       await axios.post(
         "http://localhost:5000/api/application/apply",
-        { suggestionId },
+        { suggestionId: prefId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -168,18 +168,25 @@ export default function DocPreferences() {
               {applications.map((app) => {
                 // Merge preferences + executiveSuggestions, filter nulls
                 const allApplications = [
-                  ...(app.preferences || []).map(p => ({
-                    ...p,
-                    source: "preference",
-                    suggestionId: p.suggestionId || null,
-                  })),
+                  ...(app.preferences || [])
+                    .filter(p => p.status !== "applied")
+                    .map(p => ({
+                      ...p,
+                      source: "preference",
+                    })),
+
                   ...(app.executiveSuggestions || [])
-                    .filter(Boolean)
+                    .filter(s => s.status !== "applied")
                     .map(s => ({
                       ...s,
                       source: "suggestion",
-                      suggestionId: s._id,
                     })),
+
+                  ...(app.appliedUniversities || []).map(a => ({
+                    ...a,
+                    source: "applied",
+                    status: "applied",
+                  })),
                 ];
 
                 // Map and return JSX directly
@@ -210,35 +217,30 @@ export default function DocPreferences() {
                       <td className="p-3 border">{pref.university?.country || "-"}</td>
                       <td className="p-3 border">
                         <select
-                          value={pref.status || "pending"}
+                          value={pref.status}
+                          disabled={pref.status === "applied"}
                           onChange={(e) => handleStatusChange(pref, e.target.value)}
                           className="border rounded px-2 py-1 text-sm bg-white"
                         >
                           <option value="suggested">Suggested</option>
                           <option value="preferred">Preferred</option>
                           <option value="interested">Interested</option>
-                          <option value="applied">Applied</option>
                           <option value="not_eligible">Not Eligible</option>
                         </select>
                       </td>
                       <td className="p-3 border text-gray-700">{app.visaStatus || "Pending"}</td>
                       <td className="p-3 border text-center">
                         {/* APPLY BUTTON */}
-                        {pref.source === "suggestion" &&
-                          ["suggested", "preferred", "interested"].includes(pref.status) && (
-                            <button
-                              onClick={() =>
-                                handleApply(
-                                  pref.source === "suggestion"
-                                    ? pref._id
-                                    : pref.suggestionId
-                                )
-                              }
-                              className="px-3 py-1 bg-green-500 text-white rounded text-sm mr-2"
-                            >
-                              Apply
-                            </button>
-                          )}
+                        {["suggested", "preferred", "interested"].includes(pref.status) && (
+                          <button
+                            onClick={() =>
+                              handleApply(pref._id)
+                            }
+                            className="px-3 py-1 bg-green-500 text-white rounded text-sm mr-2"
+                          >
+                            Apply
+                          </button>
+                        )}
 
                         {/* REJECT BUTTON (only for preference items) */}
                         {pref.source === "preference" && pref.status === "preferred" && (
