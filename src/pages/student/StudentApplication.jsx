@@ -169,6 +169,14 @@ const StudentApplications = () => {
     fetchSuggestions();
   }, []);
 
+  const goToPayment = (app) => {
+    window.location.href = `/student/payment/${app._id}`;
+  };
+
+  const viewOffer = (app) => {
+    window.location.href = `/student/application/${app._id}`;
+  };
+
 
   /* ================= UI ================= */
 
@@ -185,13 +193,10 @@ const StudentApplications = () => {
         </h2>
 
         {applied.length === 0 ? (
-
           <p className="text-gray-500">
             No applications submitted yet.
           </p>
-
         ) : (
-
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {applied.map((u) => (
               <div
@@ -201,22 +206,52 @@ const StudentApplications = () => {
                 <h3 className="font-bold text-blue-800">
                   {u.university?.universityName || "Unknown University"}
                 </h3>
+
                 <p className="text-sm text-gray-600 mt-1">
                   {u.course || "Unknown Course"}
                 </p>
+
                 <p className="text-xs text-gray-500 mt-1">
                   {u.university?.country || u.country || "N/A"}
                 </p>
+
                 <p className="text-xs text-gray-500 mt-1">
                   Intake: {u.university?.intakes?.join(", ") || "N/A"}
                 </p>
-                <span className="inline-block mt-2 text-green-600 text-sm font-semibold">
-                  Applied
-                </span>
+
+                {/* STATUS */}
+                <div className="mt-2">
+
+                  <span className="text-sm font-semibold text-blue-600">
+                    {u.status}
+                  </span>
+
+                  {/* PAYMENT REQUIRED */}
+                  {u.status === "Offer Received" && u.paymentStatus !== "Paid" && (
+                    <button
+                      onClick={() => goToPayment(u)}
+                      className="block mt-2 text-white bg-green-600 px-3 py-1 rounded text-xs"
+                    >
+                      Pay Tuition Fees
+                    </button>
+                  )}
+
+                  {/* VIEW OFFER */}
+                  {u.status === "Offer Received" && u.paymentStatus === "Paid" && (
+                    <button
+                      onClick={() => viewOffer(u)}
+                      className="block mt-2 text-blue-600 font-semibold text-xs underline"
+                    >
+                      View Offer Letter
+                    </button>
+                  )}
+
+                </div>
               </div>
             ))}
           </div>
         )}
+
 
       </div>
 
@@ -236,6 +271,7 @@ const StudentApplications = () => {
             No preferences added yet.
           </p>
         )}
+
 
         {!loading && preferences.length > 0 && (
 
@@ -429,6 +465,8 @@ const StudentApplications = () => {
         )}
       </div>
     </div>
+
+
 
   );
 };
