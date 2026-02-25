@@ -1,11 +1,46 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { UploadCloud } from "lucide-react";
+import toast from "react-hot-toast";
 
 export default function DocApplications() {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const downloadOfferLetter = async (url, fileName = "Offer_Letter.pdf") => {
+    try {
+      const response = await fetch(url, {
+        headers: {
+          Accept: "application/pdf",
+        },
+      });
+
+      const blob = await response.blob();
+
+      // Force PDF type even if server sends wrong one
+      const pdfBlob = new Blob([blob], { type: "application/pdf" });
+
+      const blobUrl = window.URL.createObjectURL(pdfBlob);
+      const link = document.createElement("a");
+
+      
+      link.href = blobUrl;
+      link.download = fileName.endsWith(".pdf")
+        ? fileName
+        : `${fileName}.pdf`;
+
+      document.body.appendChild(link);
+      link.click();
+
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error(error);
+      toast.error("Download failed");
+    }
+  };
+
 
   const fetchApplications = async () => {
     try {
@@ -53,20 +88,20 @@ export default function DocApplications() {
         }
       );
 
-      alert("Applied Successfully");
+      toast.success("Applied successfully");
       fetchApplications();
 
     } catch {
-      alert("Apply failed");
+      toast.error("Apply failed");
     }
   };
-  const updateProgress = async (appId, status) => {
+  const updateProgress = async (appId, universityId, status) => {
     try {
       const token = localStorage.getItem("docToken");
 
       await axios.put(
-        "http://localhost:5000/api/application/progress",
-        { appId, status },
+        "http://localhost:5000/api/progress/offer",
+        { appId, universityId, status },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -74,11 +109,11 @@ export default function DocApplications() {
         }
       );
 
-      alert("Status updated");
-      window.location.reload();
+      toast.success("Status updated");
+      fetchApplications()
     } catch (error) {
       console.error(error);
-      alert("Failed to update status");
+      toast.error("Failed to update status");
     }
   };
 
@@ -143,7 +178,9 @@ export default function DocApplications() {
 
             <tbody>
               {applications.map(app =>
+
                 app.appliedUniversities?.map(applied => (
+
                   <tr key={applied._id} className="hover:bg-gray-50 text-sm">
 
                     <td className="p-3 border font-semibold">
@@ -168,11 +205,13 @@ export default function DocApplications() {
                       <select
                         value={applied.status}
                         onChange={(e) =>
-                          updateProgress(app._id, e.target.value)
+                          updateProgress(app._id, applied._id, e.target.value)
                         }
                       >
                         {STATUS.map(s => (
+
                           <option key={s} value={s}>{s}</option>
+
                         ))}
                       </select>
                     </td>
@@ -182,13 +221,18 @@ export default function DocApplications() {
                     </td>
 
                     <td className="p-3 border">
-                      {applied.status === "Applied" && (
-                        <UploadOfferLetter appId={app._id} universityId={applied._id} />
+
+                      {applied.status?.trim() === "Applied" && !applied.offerLetter?.url && (
+                        <UploadOfferLetter
+                          appId={app._id}
+                          universityId={applied._id}
+                          refresh={fetchApplications}
+                        />
                       )}
 
-                      {applied.status === "Offer Received" && applied.offerLetter?.url && (
+                      {applied.offerLetter?.url && (
                         <a
-                          href={applied.offerLetter.url}
+                          href={`https://docs.google.com/gview?embedded=true&url=${applied.offerLetter?.url}`}
                           target="_blank"
                           rel="noreferrer"
                           className="text-blue-600 font-semibold hover:underline"
@@ -197,11 +241,34 @@ export default function DocApplications() {
                         </a>
                       )}
 
-                      {applied.status === "Fee Paid" && (
-                        <UploadAcceptanceLetter appId={app._id} universityId={applied._id} />
+                      {applied.offerLetter?.url && (
+                        <button
+                          onClick={() =>
+                            downloadOfferLetter(
+                              applied.offerLetter.url,
+                              `${app.studentId?.personalInfo?.firstName}_Offer_Letter.pdf`
+                            )}
+                          className="text-blue-600 ml-2 text-xs hover:underline"
+                        >
+                          Download Offer Letter
+                        </button>
                       )}
 
-                      {applied.status === "Acceptance Letter" && applied.acceptanceLetter?.url && (
+
+                      {applied.status === "Offer Received" && !applied.offerLetter?.url && (
+                        <span className="text-orange-500 text-xs">
+                          Offer received (No file)
+                        </span>
+                      )}
+
+                      {applied.status === "Fee Paid" && (
+                        <UploadAcceptanceLetter
+                          appId={app._id}
+                          universityId={applied._id}
+                        />
+                      )}
+
+                      {applied.acceptanceLetter?.url && (
                         <a
                           href={applied.acceptanceLetter.url}
                           target="_blank"
@@ -211,6 +278,7 @@ export default function DocApplications() {
                           View Acceptance Letter
                         </a>
                       )}
+
                     </td>
 
                   </tr>
@@ -262,18 +330,21 @@ function StatusBadge({ value }) {
   );
 }
 
-function UploadOfferLetter({ appId }) {
+function UploadOfferLetter({ appId, universityId, refresh }) {
   const uploadFile = async (e) => {
     const file = e.target.files[0];
     const token = localStorage.getItem("docToken");
 
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("document", file);
     formData.append("appId", appId);
+    formData.append("universityId", universityId);
 
     try {
+      const id = toast.loading("Uploading...");
+
       await axios.post(
-        "http://localhost:5000/api/application/upload-offer",
+        "http://localhost:5000/api/progress/upload-offer",
         formData,
         {
           headers: {
@@ -283,33 +354,36 @@ function UploadOfferLetter({ appId }) {
         }
       );
 
-      alert("Offer Letter Uploaded");
+      toast.success("Offer letter uploaded", { id });
+      refresh()
     } catch (err) {
-      alert("Upload failed");
+      console.error(err);
+      toast.error("Upload failed");
     }
   };
 
   return (
     <label className="group inline-flex items-center gap-1.5 cursor-pointer bg-white border border-blue-600 hover:border-blue-500 hover:bg-blue-50 text-blue-700 hover:text-blue-600 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-all active:scale-95">
-    <UploadCloud size={14} className="text-blue-600 group-hover:text-blue-600 transition-colors" />
-    <span>Upload Offer</span>
-    <input type="file" onChange={uploadFile} className="hidden" />
-  </label>
+      <UploadCloud size={14} />
+      <span>Upload Offer</span>
+      <input type="file" onChange={uploadFile} className="hidden" />
+    </label>
   );
 }
 
-function UploadAcceptanceLetter({ appId }) {
+function UploadAcceptanceLetter({ appId, universityId }) {
   const uploadFile = async (e) => {
     const file = e.target.files[0];
     const token = localStorage.getItem("docToken");
 
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("document", file);
     formData.append("appId", appId);
+    formData.append("universityId", universityId);
 
     try {
       await axios.post(
-        "http://localhost:5000/api/application/upload-acceptance",
+        "http://localhost:5000/api/progress/upload-acceptance",
         formData,
         {
           headers: {
@@ -319,17 +393,17 @@ function UploadAcceptanceLetter({ appId }) {
         }
       );
 
-      alert("Acceptance Letter Uploaded");
+      toast.success("Acceptance Letter Uploaded");
     } catch {
-      alert("Upload failed");
+      toast.error("Upload failed");
     }
   };
 
   return (
     <label className="group inline-flex items-center gap-1.5 cursor-pointer bg-white border border-blue-600 hover:border-blue-500 hover:bg-blue-50 text-blue-700 hover:text-blue-600 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-all active:scale-95">
-    <UploadCloud size={14} className="text-blue-600 group-hover:text-blue-600 transition-colors" />
-    <span>Upload Acceptance</span>
-    <input type="file" onChange={uploadFile} className="hidden" />
-  </label>
+      <UploadCloud size={14} className="text-blue-600 group-hover:text-blue-600 transition-colors" />
+      <span>Upload Acceptance</span>
+      <input type="file" onChange={uploadFile} className="hidden" />
+    </label>
   );
 }
