@@ -152,7 +152,7 @@ function App() {
               <Route path="applications" element={<StudentApplications />} />
               <Route path="/student/application/:id" element={<StudentApplicationDetails />}/>
               <Route path="documents" element={<Documents />} />
-              <Route path="payments" element={<Payments />} />
+              <Route path="/student/payment/:id" element={<Payments />} />
               <Route path="universities" element={<Universities />} />
               <Route path="visa" element={<Visa />} />
               <Route path="notifications" element={<Notifications />} />
