@@ -64,6 +64,7 @@ import UniversityForm from "./pages/admin/UniversityForm.jsx";
 
 import { useLocation } from "react-router-dom";
 import DocPreferences from "./pages/documetation/DocPreferences.jsx";
+import StudentApplicationDetails from "./pages/student/StudentApplicationDetails.jsx";
 
 function Debug() {
   const location = useLocation();
@@ -149,6 +150,7 @@ function App() {
 
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="applications" element={<StudentApplications />} />
+              <Route path="/student/application/:id" element={<StudentApplicationDetails />}/>
               <Route path="documents" element={<Documents />} />
               <Route path="payments" element={<Payments />} />
               <Route path="universities" element={<Universities />} />
