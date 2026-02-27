@@ -2,6 +2,7 @@ import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import PaymentCard from "../../components/student/PaymentCard";
 import PaymentStepper from "../../components/student/PaymentStepper";
+import PaymentGatewayModal from "../../components/student/PaymentGatewayModal";
 
 const Payments = () => {
   const { id } = useParams();
@@ -9,6 +10,7 @@ const Payments = () => {
   const [application, setApplication] = useState(null);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
+  const [showGateway, setShowGateway] = useState(false);
 
   useEffect(() => {
     fetchApplication();
@@ -48,7 +50,7 @@ const Payments = () => {
       const token = localStorage.getItem("token");
 
       const res = await fetch(
-        "http://localhost:5000/api/payment/service-fee",
+        "http://localhost:5000/api/payment/complete",
         {
           method: "POST",
           headers: {
@@ -57,21 +59,21 @@ const Payments = () => {
           },
           body: JSON.stringify({
             appId: id,
-            universityId,
-          }),
+            universityId: universityId,
+          })
         }
       );
 
       const data = await res.json();
-      
+
       if (!res.ok) {
-        setProcessing(false); // add this
         alert(data.message || "Payment failed");
         return;
       }
 
-      alert("Service Fee Payment Successful");
+      alert(data.message);
       fetchApplication();
+
     } catch (err) {
       console.error("Payment error:", err);
       alert("Something went wrong");
@@ -113,6 +115,16 @@ const Payments = () => {
       {/* Stepper */}
       <PaymentStepper />
 
+      {showGateway && (
+        <PaymentGatewayModal
+          onClose={() => setShowGateway(false)}
+          onSuccess={() => {
+            payNow(uni._id);
+            setShowGateway(false);
+          }}
+        />
+      )}
+
       {/* Payment Header */}
       <div className="bg-white rounded-2xl shadow-sm border p-5">
         <h2 className="text-lg font-semibold">
@@ -150,13 +162,7 @@ const Payments = () => {
           }
           disabled={!uni || servicePaid || processing}
 
-          onPay={() => {
-            if (!uni) {
-              alert("Application not ready yet");
-              return;
-            }
-            payNow(uni._id);
-          }}
+          onPay={() => setShowGateway(true)}
         />
 
         {/* Visa Fee */}
