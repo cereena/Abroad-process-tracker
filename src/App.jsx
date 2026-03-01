@@ -38,7 +38,6 @@ import CourseFinder from "./pages/documetation/CourseFinder.jsx";
 import DocsCommission from "./pages/documetation/DocsCommission.jsx";
 
 // student pages
-import StudentProfileGaurd from "./pages/student/studentProfileGuard.jsx";
 import Dashboard from "./pages/student/Dashboard.jsx";
 import StudentApplications from "./pages/student/StudentApplication.jsx";
 import Documents from "./pages/student/Documents.jsx";
@@ -65,6 +64,7 @@ import UniversityForm from "./pages/admin/UniversityForm.jsx";
 import { useLocation } from "react-router-dom";
 import DocPreferences from "./pages/documetation/DocPreferences.jsx";
 import StudentApplicationDetails from "./pages/student/StudentApplicationDetails.jsx";
+import PaymentSuccess from "./pages/student/PaymentSuccess.jsx";
 
 function Debug() {
   const location = useLocation();
@@ -76,7 +76,7 @@ function App() {
   return (
     <BrowserRouter>
 
-    <Debug />
+      <Debug />
       {/* ✅ Toast must be outside Routes */}
       <ToastContainer
         position="top-right"
@@ -136,35 +136,33 @@ function App() {
         </Route>
 
 
+
         {/* Student */}
         <Route path="/student/login" element={<Login />} />
+
+
 
         <Route path="/student" element={<StudentLayout />}>
           <Route element={<ProtectedRoute role="student" />}>
 
-            {/* EDIT PROFILE (form) */}
             <Route path="my-profile" element={<Profile />} />
 
-            {/* GUARD */}
             <Route element={<StudentProfileGuard />}>
 
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="applications" element={<StudentApplications />} />
-              <Route path="/student/application/:id" element={<StudentApplicationDetails />}/>
+              <Route path="applications/:appliedId" element={<StudentApplicationDetails />} />
               <Route path="documents" element={<Documents />} />
-              <Route path="/student/payment/:id" element={<Payments />} />
+              <Route path="/student/payment/:appliedId" element={<Payments />} />
+              <Route path="/student/payment-success/:appliedId" element={<PaymentSuccess />} />
               <Route path="universities" element={<Universities />} />
               <Route path="visa" element={<Visa />} />
               <Route path="notifications" element={<Notifications />} />
-
-              {/* VIEW PROFILE */}
               <Route path="profile" element={<StudentProfilePage />} />
 
             </Route>
           </Route>
         </Route>
-
-
 
 
       </Routes>

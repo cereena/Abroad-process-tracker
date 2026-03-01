@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import {
   Globe,
@@ -8,10 +9,11 @@ import {
   Star,
 } from "lucide-react";
 import { toast } from 'react-toastify';
+import { useNavigate } from "react-router-dom";
 
 const StudentApplications = () => {
 
-
+  const navigate = useNavigate();
   // On student side
   const markInterested = async (prefId, courseChosen) => {
     const token = localStorage.getItem("token");
@@ -169,12 +171,18 @@ const StudentApplications = () => {
     fetchSuggestions();
   }, []);
 
-  const goToPayment = (app) => {
-    window.location.href = `/student/payment/${app._id}`;
+
+  const goToPayment = (u) => {
+    if (!u?._id) {
+      console.error("Invalid applied university:", u);
+      return;
+    }
+
+    navigate(`/student/payment/${u._id}`);
   };
 
   const viewOffer = (app) => {
-    window.location.href = `/student/application/${app._id}`;
+    navigate(`/student/applications/${app._id}`);
   };
 
 
@@ -198,57 +206,60 @@ const StudentApplications = () => {
           </p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {applied.map((u) => (
-              <div
-                key={u._id}
-                className="bg-blue-50 p-4 rounded-lg border shadow-sm"
-              >
-                <h3 className="font-bold text-blue-800">
-                  {u.university?.universityName || "Unknown University"}
-                </h3>
+            {applied.map((u) => {
+              console.log("APPLIED DATA:", u);
+              return (
+                <div
+                  key={u._id}
+                  className="bg-blue-50 p-4 rounded-lg border shadow-sm"
+                >
+                  <h3 className="font-bold text-blue-800">
+                    {u.university?.universityName || "Unknown University"}
+                  </h3>
 
-                <p className="text-sm text-gray-600 mt-1">
-                  {u.course || "Unknown Course"}
-                </p>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {u.course || "Unknown Course"}
+                  </p>
 
-                <p className="text-xs text-gray-500 mt-1">
-                  {u.university?.country || u.country || "N/A"}
-                </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {u.university?.country || u.country || "N/A"}
+                  </p>
 
-                <p className="text-xs text-gray-500 mt-1">
-                  Intake: {u.university?.intakes?.join(", ") || "N/A"}
-                </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Intake: {u.university?.intakes?.join(", ") || "N/A"}
+                  </p>
 
-                {/* STATUS */}
-                <div className="mt-2">
+                  {/* STATUS */}
+                  <div className="mt-2">
 
-                  <span className="text-sm font-semibold text-blue-600">
-                    {u.status}
-                  </span>
+                    <span className="text-sm font-semibold text-blue-600">
+                      {u.status}
+                    </span>
 
-                  {/* PAYMENT REQUIRED */}
-                  {u.status === "Offer Received" && u.paymentStatus !== "Paid" && (
-                    <button
-                      onClick={() => goToPayment(u)}
-                      className="block mt-2 text-white bg-green-600 px-3 py-1 rounded text-xs"
-                    >
-                      Pay Tuition Fees
-                    </button>
-                  )}
+                    {/* PAYMENT REQUIRED */}
+                    {u.status === "Offer Received" && !u.paymentStatus?.includes("Paid") && (
+                      <button
+                        onClick={() => goToPayment(u)}
+                        className="block mt-2 text-white bg-green-600 px-3 py-1 rounded text-xs"
+                      >
+                        Pay Tuition Fees
+                      </button>
+                    )}
 
-                  {/* VIEW OFFER */}
-                  {u.status === "Offer Received" && u.paymentStatus === "Paid" && (
-                    <button
-                      onClick={() => viewOffer(u)}
-                      className="block mt-2 text-blue-600 font-semibold text-xs underline"
-                    >
-                      View Offer Letter
-                    </button>
-                  )}
+                    {/* VIEW OFFER */}
+                    {u.status === "Offer Received" && u.paymentStatus?.includes("Paid") && (
+                      <button
+                        onClick={() => viewOffer(u)}
+                        className="block mt-2 text-blue-600 font-semibold text-xs underline"
+                      >
+                        View Offer Letter
+                      </button>
+                    )}
 
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 

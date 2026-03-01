@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 
 const StudentApplicationDetails = () => {
-  const { id } = useParams();
+  const { appliedId } = useParams();
   const [app, setApp] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -12,7 +12,7 @@ const StudentApplicationDetails = () => {
       const token = localStorage.getItem("token");
 
       const res = await fetch(
-        `http://localhost:5000/api/application/${id}`,
+        `http://localhost:5000/api/application/${appliedId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -21,6 +21,8 @@ const StudentApplicationDetails = () => {
       );
 
       const data = await res.json();
+      console.log("API RESPONSE:", data);
+
       setApp(data);
     } catch (err) {
       console.error(err);
@@ -31,11 +33,33 @@ const StudentApplicationDetails = () => {
   };
 
   useEffect(() => {
-    fetchApplication();
-  }, []);
+    if (appliedId) fetchApplication();
+  }, [appliedId]);
 
-  const downloadOffer = () => {
-    window.open(app.offerLetter, "_blank");
+  const viewOffer = () => {
+    if (!app?.offerLetter?.url) {
+      toast.error("Offer letter not available");
+      return;
+    }
+
+    window.open(app.offerLetter.url, "_blank");
+  };
+
+  const downloadOffer = async () => {
+    try {
+      const response = await fetch(app.offerLetter.url);
+      const blob = await response.blob();
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "Offer-Letter.pdf";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      toast.error("Download failed");
+    }
   };
 
   if (loading) return <p className="p-6">Loading...</p>;
@@ -64,14 +88,14 @@ const StudentApplicationDetails = () => {
             Offer Letter
           </h3>
 
-          {app.paymentStatus !== "Paid" ? (
+          {app.paymentStatus !== "Registration Paid" ? (
             <div className="text-red-500 text-sm">
               Complete payment to unlock offer letter.
             </div>
           ) : (
             <>
               <button
-                onClick={downloadOffer}
+                onClick={viewOffer}
                 className="px-4 py-2 bg-blue-600 text-white rounded"
               >
                 View Offer Letter

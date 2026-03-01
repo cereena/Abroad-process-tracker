@@ -13,6 +13,7 @@ const links = [
   { name: "Universities", path: "/student/universities" },
   { name: "Visa Status", path: "/student/visa" },
   { name: "Notifications", path: "/student/notifications" },
+  
 
 ];
 
