@@ -105,7 +105,7 @@ const StudentApplicationDetails = () => {
                 onClick={downloadOffer}
                 className="px-4 py-2 bg-green-600 text-white rounded ml-2"
               >
-                Download Offer Letter
+                Download Offer Letter l
               </button>
             </>
           )}
