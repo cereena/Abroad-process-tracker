@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import { Eye, Download } from "lucide-react";
 
 const StudentApplicationDetails = () => {
   const { appliedId } = useParams();
@@ -42,73 +43,146 @@ const StudentApplicationDetails = () => {
       return;
     }
 
-    window.open(app.offerLetter.url, "_blank");
+    const viewer = `https://docs.google.com/gview?embedded=true&url=${app.offerLetter.url}`;
+    window.open(viewer, "_blank");
   };
 
   const downloadOffer = async () => {
     try {
+      if (!app?.offerLetter?.url) {
+        toast.error("Offer letter not available");
+        return;
+      }
+
       const response = await fetch(app.offerLetter.url);
       const blob = await response.blob();
 
       const url = window.URL.createObjectURL(blob);
+
       const link = document.createElement("a");
       link.href = url;
       link.download = "Offer-Letter.pdf";
+
       document.body.appendChild(link);
       link.click();
       link.remove();
+
+      window.URL.revokeObjectURL(url);
+
     } catch (error) {
       toast.error("Download failed");
     }
   };
 
-  if (loading) return <p className="p-6">Loading...</p>;
-  if (!app) return <p className="p-6">Application not found</p>;
+  if (loading)
+    return (
+      <div className="p-10 text-center text-gray-500">
+        Loading application...
+      </div>
+    );
+
+  if (!app)
+    return (
+      <div className="p-10 text-center text-red-500">
+        Application not found
+      </div>
+    );
 
   return (
-    <div className="p-6 space-y-6 bg-blue-50 min-h-screen">
+    <div className="p-8 bg-blue-50 min-h-screen">
 
-      <div className="bg-white p-6 rounded-xl shadow">
-        <h2 className="text-xl font-bold text-blue-700">
+      {/* PAGE HEADER */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-blue-700">
+          Student Application
+        </h1>
+        <p className="text-sm text-gray-500">
+          View application details and documents
+        </p>
+      </div>
+
+      {/* APPLICATION CARD */}
+      <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+
+        <h2 className="text-lg font-semibold text-gray-700 mb-4">
           Application Details
         </h2>
 
-        <div className="mt-4 space-y-2 text-sm">
-          <p><b>University:</b> {app.university?.universityName}</p>
-          <p><b>Country:</b> {app.university?.country}</p>
-          <p><b>Course:</b> {app.course}</p>
-          <p><b>Status:</b> {app.status}</p>
+        <div className="grid md:grid-cols-2 gap-4 text-sm">
+
+          <div>
+            <p className="text-gray-500">University</p>
+            <p className="font-semibold">
+              {app.university?.universityName}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-gray-500">Country</p>
+            <p className="font-semibold">
+              {app.university?.country}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-gray-500">Course</p>
+            <p className="font-semibold">
+              {app.course}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-gray-500">Status</p>
+
+            <span className="inline-block mt-1 px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-700">
+              {app.status}
+            </span>
+          </div>
+
         </div>
       </div>
 
-      {/* OFFER LETTER SECTION */}
+      {/* OFFER LETTER CARD */}
       {app.status === "Offer Received" && (
-        <div className="bg-white p-6 rounded-xl shadow space-y-3">
-          <h3 className="font-semibold text-green-700">
+        <div className="mt-6 bg-white rounded-xl shadow-md p-6 border border-gray-100">
+
+          <h3 className="text-lg font-semibold text-green-700 mb-3">
             Offer Letter
           </h3>
 
           {app.paymentStatus !== "Registration Paid" ? (
-            <div className="text-red-500 text-sm">
-              Complete payment to unlock offer letter.
+
+            <div className="bg-red-50 border border-red-200 text-red-600 text-sm p-4 rounded-lg">
+              Complete registration payment to unlock the offer letter.
             </div>
+
           ) : (
-            <>
+
+            <div className="flex flex-wrap gap-3">
+
+              {/* VIEW */}
               <button
                 onClick={viewOffer}
-                className="px-4 py-2 bg-blue-600 text-white rounded"
+                disabled={!app.offerLetter?.url}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 disabled:opacity-50"
               >
+                <Eye size={16} />
                 View Offer Letter
               </button>
 
+              {/* DOWNLOAD */}
               <button
                 onClick={downloadOffer}
-                className="px-4 py-2 bg-green-600 text-white rounded ml-2"
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700"
               >
-                Download Offer Letter l
+                <Download size={16} />
+                Download Offer Letter
               </button>
-            </>
+
+            </div>
+
           )}
+
         </div>
       )}
 
