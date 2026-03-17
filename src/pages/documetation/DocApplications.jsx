@@ -209,7 +209,7 @@ export default function DocApplications() {
             placeholder="Search student..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="border border-gray-300 px-3 py-1.5 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="border border-gray-300 px-3 py-1.5 bg-white rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
 
           {/* STATUS FILTER */}
@@ -309,9 +309,84 @@ export default function DocApplications() {
                         </td>
 
                         <td className="p-3 border align-middle">
-                          {/* your document buttons remain same */}
-                        </td>
 
+                          {/* Upload Offer Letter */}
+                          {!applied.offerLetter?.url &&
+                            (applied.status === "Applied" || applied.status === "Offer Received") && (
+                              <UploadOfferLetter
+                                appId={app._id}
+                                universityId={applied._id}
+                                refresh={fetchApplications}
+                              />
+                            )}
+
+                          {/* Offer Letter Exists */}
+                          {applied.offerLetter?.url && (
+                            <div className="flex items-center justify-center gap-2 min-h-[40px]">
+
+                              {/* VIEW */}
+                              <a
+                                href={`https://docs.google.com/gview?embedded=true&url=${applied.offerLetter.url}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="p-2 rounded-md bg-blue-50 text-blue-600 hover:bg-blue-100"
+                                title="View Offer Letter"
+                              >
+                                <Eye size={16} />
+                              </a>
+
+                              {/* DOWNLOAD */}
+                              <button
+                                onClick={() =>
+                                  downloadOfferLetter(
+                                    applied.offerLetter.url,
+                                    `${app.studentId?.personalInfo?.firstName}_Offer_Letter.pdf`
+                                  )
+                                }
+                                className="p-2 rounded-md bg-green-50 text-green-600 hover:bg-green-100"
+                                title="Download Offer Letter"
+                              >
+                                <Download size={16} />
+                              </button>
+
+                              {/* REUPLOAD */}
+                              <ReUploadOfferLetter
+                                appId={app._id}
+                                universityId={applied._id}
+                                refresh={fetchApplications}
+                              />
+
+                            </div>
+                          )}
+
+                          {/* Offer received but no file */}
+                          {applied.status === "Offer Received" && !applied.offerLetter?.url && (
+                            <span className="text-orange-500 text-xs">
+                              Offer received (No file)
+                            </span>
+                          )}
+
+                          {/* Upload Acceptance */}
+                          {applied.status === "Fee Paid" && (
+                            <UploadAcceptanceLetter
+                              appId={app._id}
+                              universityId={applied._id}
+                            />
+                          )}
+
+                          {/* View Acceptance Letter */}
+                          {applied.acceptanceLetter?.url && (
+                            <a
+                              href={applied.acceptanceLetter.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-green-600 font-semibold hover:underline"
+                            >
+                              View Acceptance Letter
+                            </a>
+                          )}
+
+                        </td>
                       </tr>
                     ))
                 )}

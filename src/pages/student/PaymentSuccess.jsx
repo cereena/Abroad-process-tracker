@@ -1,26 +1,50 @@
+
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { CheckCircle } from "lucide-react";
+import axios from "axios";
 
 const PaymentSuccess = () => {
+
   const navigate = useNavigate();
   const { appliedId } = useParams();
 
   useEffect(() => {
-    console.log("Applied ID:", appliedId);
 
-    if (!appliedId) return;
+    const confirmPayment = async () => {
+      try {
+
+        const token = localStorage.getItem("token");
+
+        await axios.post(
+          "http://localhost:5000/api/payment/service-success",
+          { appliedId },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        );
+
+      } catch (error) {
+        console.error("Payment confirmation failed");
+      }
+    };
+
+    confirmPayment();
 
     const timer = setTimeout(() => {
-      navigate(`/student/application/${appliedId}`);
+      navigate(`/student/applications/${appliedId}`);
     }, 2500);
 
     return () => clearTimeout(timer);
+
   }, [appliedId, navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50">
       <div className="bg-white shadow-2xl rounded-2xl p-10 text-center max-w-md w-full">
+
         <div className="flex justify-center mb-4">
           <CheckCircle className="text-green-500" size={48} />
         </div>
@@ -30,12 +54,13 @@ const PaymentSuccess = () => {
         </h2>
 
         <p className="text-gray-500 mt-3">
-          Your service charge has been received.
+          Your payment has been received.
         </p>
 
         <div className="mt-6 animate-pulse text-sm text-gray-500">
           Redirecting...
         </div>
+
       </div>
     </div>
   );

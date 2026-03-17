@@ -65,6 +65,7 @@ import { useLocation } from "react-router-dom";
 import DocPreferences from "./pages/documetation/DocPreferences.jsx";
 import StudentApplicationDetails from "./pages/student/StudentApplicationDetails.jsx";
 import PaymentSuccess from "./pages/student/PaymentSuccess.jsx";
+import TuitionPaymentPage from "./pages/student/TuitionPaymentPage.jsx";
 
 function Debug() {
   const location = useLocation();
@@ -153,8 +154,9 @@ function App() {
               <Route path="applications" element={<StudentApplications />} />
               <Route path="applications/:appliedId" element={<StudentApplicationDetails />} />
               <Route path="documents" element={<Documents />} />
-              <Route path="/student/payment/:appliedId" element={<Payments />} />
-              <Route path="/student/payment-success/:appliedId" element={<PaymentSuccess />} />
+              <Route path="payment/:appliedId" element={<Payments />} />
+              <Route path="payment-success/:appliedId" element={<PaymentSuccess />} />
+              <Route path="tuition-payment/:appliedId" element={<TuitionPaymentPage />}/>
               <Route path="universities" element={<Universities />} />
               <Route path="visa" element={<Visa />} />
               <Route path="notifications" element={<Notifications />} />
